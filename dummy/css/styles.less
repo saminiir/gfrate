@@ -1,0 +1,134 @@
+/*
+
+ORANGES
+#6100FF
+#4400B3
+#D7BFFF
+#B080FF
+
+GREENS
+#FF7400
+#B35100
+#FFDCBF
+#FFBA80
+
+VIOLETS
+#63FF00
+#45B300
+#D8FFBF
+#B1FF80
+
+*/
+
+@base: #FFF;
+
+@black: #000;
+@darkest: #000;
+@darker: #333;
+@dark: #555;
+@medium: #888;
+@light: #AAA;
+@lighter: #CCC;
+@lightest: #EEE;
+@white: #FFF;
+
+// Utils
+.bold { font-weight: bold;}
+.italic { font-style: italic; }
+.normal { font-style: normal;}
+.right { float: right;}
+.left { float: left;}
+.centeredText { text-align: center;}
+.paddingThin { padding: 0.5em;}
+.paddingThick { padding: 1em;}
+.paddingSick { padding: 2em; }
+.noPadding { padding: 0;}
+.noMargin { margin: 0; }
+.zeroAuto {	margin: 0 auto; }
+.scale { max-width: 85%;}
+.softenText { text-shadow: 0 0 1px rgba(125, 125, 125, 0.5); }
+
+html, body {height: 100%;}
+
+body {
+	.centeredText;
+	font-family: "Fjalla One", sans-serif;
+	background: @white;
+	color: @white;
+}
+
+#wrap {
+	background: @black;
+	height: 100%;
+	width: 100%;
+	position: relative;
+
+	section {
+		background: @black;
+	}
+
+	#upper {
+		position:absolute;
+		height: 50%;
+		width: 100%;
+		line-height: 1.5;
+		z-index: 100;
+		#score {
+			font-size: 16em;
+			&:first-letter { font-size: 120%;}
+		}
+		#description { 
+			font-size: 4em;
+			font-style: italic;
+		}
+		#rank { font-size: 2em;}
+	}
+	#middle {
+		position:absolute;
+		top: 50%;
+		width: 100%;
+		height: 25%;
+		font-size: 2em;
+		line-height: 0;
+		border-top: 1px solid @white;
+		z-index: 100;
+		border-bottom: 1px solid @white;
+		p { position: relative; top: 50%; width: 100%; }
+	}
+	#lower {
+		position: absolute;
+		top: 75%;
+		width: 100%;
+		height: 25%;
+		margin: 0;
+		button { 
+			background: @black;
+			font-size: 10em;
+			width: 100%;
+			height: 100%;
+			border: 0;
+			line-height: 0;
+			vertical-align: middle;
+
+	   }
+		button:hover {
+			background: white;
+		}
+		button:active {
+			background: white;
+		}
+		#plus {
+			.left;
+			width: 50%;
+			height: 100%;
+			button { color: #6ccef3; border-right: 1px solid @white;}
+		}
+		#minus {
+			.right;
+			width: 50%;
+			height: 100%;
+			button { color: #f5bd27;}
+		}
+	}
+
+}

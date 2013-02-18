@@ -8,17 +8,29 @@ from sqlalchemy.engine import create_engine
 from gfrate.main.models import Model
 from sqlalchemy import orm
 import datetime
+import contextlib
 
 class Test(unittest.TestCase):
 
     def setUp(self):
         engine = create_engine('sqlite:///:memory', echo=True)
+
         Model.metadata.bind = engine
         Model.metadata.create_all()
+        
+        with contextlib.closing(engine.connect()) as con:
+            trans = con.begin()
+            for table in reversed(Model.metadata.sorted_tables):
+                con.execute(table.delete())
+                trans.commit()
+ 
         
         sm = orm.sessionmaker(bind=engine, autoflush=True, autocommit=False,
                               expire_on_commit=True)
         self.session = orm.scoped_session(sm)
+    
+    def tearDown(self):
+        self.session.remove()
 
     def testSQLAlchemyForUser(self):
         user = self.createUser("sailniir", "secret", "")

@@ -19,6 +19,15 @@ PASSWORD = 'default'
 def index():
     return 'Here be index!'
 
+@app.route('/initiate', methods=['POST'])
+def initiate():
+    return '''HTTP/1.1 200 OK
+Content-Type: application/x-www-form-urlencoded
+
+oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&
+oauth_callback_confirmed=true'''
+    
+
 @app.route('/hello/<name>')
 def hello(name):
     return 'Hello {0}'.format(name)

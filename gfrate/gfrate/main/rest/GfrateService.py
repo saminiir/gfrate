@@ -5,8 +5,8 @@ Created on Feb 5, 2013
 '''
 
 import sqlite3
-from flask import Flask
 from contextlib import closing
+from gfrate.main import app
 
 # configuration
 DATABASE = '/tmp/gfrate_test.db'
@@ -14,9 +14,6 @@ DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
-
-app = Flask(__name__)
-app.config.from_object(__name__)
 
 @app.route('/')
 def index():
@@ -34,6 +31,3 @@ def init_db():
         with app.open_resource('schema.sql') as f:
             db.cursor().executescript(f.read())
         db.commit()
-
-if __name__ == '__main__':
-    app.run(debug=True)

@@ -7,6 +7,8 @@ Created on Feb 5, 2013
 import sqlite3
 from contextlib import closing
 from gfrate.main import app
+from flask.globals import request
+from flask.wrappers import Response
 
 # configuration
 DATABASE = '/tmp/gfrate_test.db'
@@ -19,14 +21,23 @@ PASSWORD = 'default'
 def index():
     return 'Here be index!'
 
-@app.route('/initiate', methods=['POST'])
+@app.route('/initiate', methods=['GET'])
 def initiate():
-    return '''HTTP/1.1 200 OK
-Content-Type: application/x-www-form-urlencoded
-
-oauth_token=hh5s93j4hdidpola&oauth_token_secret=hdhd0244k9j7ao03&
-oauth_callback_confirmed=true'''
+    #   r = requests.post("lol")
     
+    oauth_consumer_key = request.args.get('oauth_consumer_key', '')
+    oauth_signature_method = request.args.get('oauth_signature_method', '')
+    oauth_timestamp = request.args.get('oauth_timestamp', '')
+    oauth_nonce = request.args.get('oauth_nonce', '')
+    test = request.args.get('test', '')
+    
+    resp = Response(status=200)
+    resp.headers['test'] = ("testing", "ja")
+    #resp.data = "testasdffsdasf"
+    
+    return resp
+   
+     
 
 @app.route('/hello/<name>')
 def hello(name):

@@ -14,18 +14,14 @@ class OAuthTest(unittest.TestCase):
         pass
     
     def testInitiate(self):
-        rv = self.app.post('/initiate', data=dict(
-                        oauth_consumer_key="dpf43f3p2l4k3l03",
-                        oauth_timestamp="137131200",
-                        oauth_nonce="wIjqoS",
-                        oauth_callback="http%3A%2F%2Fprinter.example.com%2Fready",
-                        oauth_signature="74KNZJeDHnMBp0EMJ9ZHt%2FXKycU%3D"
-                        ))
+        rv = self.app.get("""/initiate?oauth_version=1.0&oauth_nonce=67c70a6035012347d9998308c2f3af04
+                          &oauth_timestamp=1361727573&oauth_consumer_key=test&oauth_signature_method=HMAC-SHA1
+                          &oauth_signature=9j07IVLp3nyl2fU6ez5FfkTGtT0%3D""")
         
         #self.assertEquals(rv.data, 'test')
         
         assert 'oauth_token' in rv.data
     
     def initiateOAuth(self):
-        rv = self.app.get('\initiate')
+        rv = self.app.get('/initiate')
         return rv

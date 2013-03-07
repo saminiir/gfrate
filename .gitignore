@@ -39,3 +39,4 @@ env
 :memory
 *.log
 *.swp
+node_modules

@@ -37,6 +37,5 @@ venv
 env
 *.pyc
 :memory
-node_modules
 *.log
 *.swp

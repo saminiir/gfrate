@@ -9,7 +9,7 @@ var express = require('express')
   , http = require('http')
   , path = require('path');
 
-var app = express.createServer();
+var app = express.createServer(express.logger());
 var port = process.env.PORT || 5000;
 
 app.configure(function(){

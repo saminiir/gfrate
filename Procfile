@@ -1,1 +1,1 @@
-app: node app.js
+app: node gfrate_js/app.js

@@ -40,3 +40,4 @@ env
 *.log
 *.swp
 node_modules
+*_bak*

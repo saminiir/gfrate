@@ -38,3 +38,4 @@ env
 *.pyc
 :memory
 node_modules
+*.log

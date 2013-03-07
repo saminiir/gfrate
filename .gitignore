@@ -37,4 +37,4 @@ venv
 env
 *.pyc
 :memory
-node-modules/
+node_modules

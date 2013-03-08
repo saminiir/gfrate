@@ -5,17 +5,25 @@ var oauthorize = require('oauthorize')
   , path = require('path');
 
 var app = express();
-app.use(express.logger());
-app.use(express.cookieParser());
-app.use(express.bodyParser());
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-app.use(express.session({ secret: 'secret' }));
-app.use(passport.initialize());
-app.use(app.router);
-app.use(passport.session());
-app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.configure(function(){
+    app.use(express.logger('dev'));
+    app.use(express.favicon());
+    app.use(express.cookieParser());
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
+    app.use(express.session({ secret: 'secret' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(app.router);
+    app.use(express.static(path.join(__dirname, 'public')));
+});
+
+app.configure('development', function(){
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+});
+
 
 var server = oauthorize.createServer();
 
@@ -23,6 +31,7 @@ require('./auth');
 
 app.get('/', routes.index);
 app.get('/login', routes.loginForm);
+app.post('/login', routes.loginValidation);
 
 app.post('/request_token',
   passport.authenticate('consumer', { session: false }),

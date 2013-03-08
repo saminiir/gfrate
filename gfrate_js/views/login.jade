@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1 Login
+  form(action="/login", method="post")
+    div
+      label Username:
+      input(type="text", name="username")
+      br
+    div
+      label Password:
+      input(type="text", name="password")
+    div
+      input(type="submit", value="Login")
+  p Hint - bob:secret
+  p Hint - joe:password

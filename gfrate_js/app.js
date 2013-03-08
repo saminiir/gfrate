@@ -1,24 +1,28 @@
-var oauthorize = require('oauthorize');
-var express = require('express');
-var passport = require('passport');
+var oauthorize = require('oauthorize')
+  , express = require('express')
+  , passport = require('passport')
+  , routes = require('./routes')
+  , path = require('path');
 
 var app = express();
 app.use(express.logger());
 app.use(express.cookieParser());
 app.use(express.bodyParser());
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
 app.use(express.session({ secret: 'secret' }));
 app.use(passport.initialize());
-app.use(passport.session());
 app.use(app.router);
+app.use(passport.session());
 app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 var server = oauthorize.createServer();
 
 require('./auth');
 
-app.get('/', function(request, response) {
-  response.send('Hello World!');
-});
+app.get('/', routes.index);
+app.get('/login', routes.loginForm);
 
 app.post('/request_token',
   passport.authenticate('consumer', { session: false }),

@@ -3,7 +3,18 @@ var express = require('express');
 var passport = require('passport');
 
 var app = express();
+app.use(express.logger());
+app.use(express.cookieParser());
+app.use(express.bodyParser());
+app.use(express.session({ secret: 'secret' }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(app.router);
+app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+
 var server = oauthorize.createServer();
+
+require('./auth');
 
 app.get('/', function(request, response) {
   response.send('Hello World!');

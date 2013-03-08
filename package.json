@@ -10,7 +10,10 @@
     "express": "3.x",
     "jade": "*",
     "oauthorize": "*",
-    "passport": "*"
+    "passport": "*",
+    "passport-local": "0.1.x",
+    "passport-http-oauth": "0.1.x",
+    "connect-ensure-login": "0.1.x"
   },
   "devDependencies": {
     "mocha": "*"

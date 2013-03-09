@@ -16,7 +16,8 @@
     "connect-ensure-login": "0.1.x"
   },
   "devDependencies": {
-    "mocha": "*"
+    "mocha": "*",
+    "should": "*"
   },
   "engines": {
     "node": "0.8.x",

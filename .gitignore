@@ -41,3 +41,4 @@ env
 *.swp
 node_modules
 *_bak*
+*.swo

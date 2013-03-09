@@ -5,7 +5,7 @@ var passport = require('passport')
  */
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'RateMyPartner' });
 };
 
 exports.loginForm = function(req, res){

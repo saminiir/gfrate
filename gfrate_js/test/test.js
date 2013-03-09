@@ -1,22 +1,6 @@
 var assert = require("assert")
-describe('Array', function(){
-  describe('#indexOf()', function(){
-    it('should return -1 when the value is not present', function(){
-      assert.equal(-1, [1,2,3].indexOf(5));
-      assert.equal(-1, [1,2,3].indexOf(0));
-    })
-  })
-})
-
 require("should");
-
-describe('feature', function() {
-  it("should add two numbers", function() {
-    (2+2).should.equal(4);
-  });
-});
-
-routes = require("../routes");
+var routes = require("../routes");
 
 describe('routes', function(){
   describe('index', function(){
@@ -25,7 +9,7 @@ describe('routes', function(){
       var res = {
         render: function(view, vars){
           view.should.equal("index");
-          vars.title.should.equal("Express");
+          vars.title.should.equal("RateMyPartner");
         }}; 
       routes.index(req, res);
     });

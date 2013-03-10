@@ -1,7 +1,7 @@
-var oauthorize = require('oauthorize')
-  , express = require('express')
+var express = require('express')
   , passport = require('passport')
   , routes = require('./routes')
+  , oauth = require('./oauth')
   , path = require('path');
 
 var app = express();
@@ -24,27 +24,16 @@ app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-
-var server = oauthorize.createServer();
-
 require('./auth');
 
 app.get('/', routes.index);
 app.get('/login', routes.loginForm);
 app.post('/login', routes.loginValidation);
+app.get('/authorize', oauth.userAuthorization);
+app.post('/authorize/decision', oauth.userDecision);
 
-app.post('/request_token',
-  passport.authenticate('consumer', { session: false }),
-  server.requestToken(function(client, callbackURL, done) {
-    var token = utils.uid(8)
-      , secret = utils.uid(32)
-
-    var t = new RequestToken(token, secret, client.id, callbackURL);
-    t.save(function(err) {
-      if (err) { return done(err); }
-      return done(null, token, secret);
-    });
-  }));
+app.post('/oauth/request_token', oauth.requestToken);
+app.post('/oauth/access_token', oauth.accessToken);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

@@ -29,6 +29,8 @@ require('./auth');
 app.get('/', routes.index);
 app.get('/login', routes.loginForm);
 app.post('/login', routes.loginValidation);
+app.get('/logout', routes.logout);
+
 app.get('/authorize', oauth.userAuthorization);
 app.post('/authorize/decision', oauth.userDecision);
 

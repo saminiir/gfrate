@@ -1,6 +1,7 @@
 var should = require('should');
 var request = require('supertest');
 var app = require('../app');
+var crypto = require('crypto');
 	
 describe('oauth', function() {
   describe('POST /oauth/request_token', function(){ 	
@@ -17,12 +18,34 @@ describe('oauth', function() {
 
     it('should respond OK with params', function(done){
       var timestamp = Math.floor(new Date().getTime() / 1000);
+
+      var base_string_uri = 'http://localhost:5000/oauth/request_token';
+      var encoded_base_uri = encodeURIComponent(base_string_uri);
+      console.log(encoded_base_uri);
+
       var consumer_key = 'abc123';
       var consumerSecret = 'ssh-secret';
-      var oauth_header = 'OAuth oauth_nonce="K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw", oauth_callback="http%3A%2F%2Fmyapp.com%3A3005%2Ftwitter%2Fprocess_callback", oauth_signature_method="HMAC-SHA1", oauth_timestamp="'+timestamp+'", oauth_consumer_key="'+consumer_key+'", oauth_signature="Pc%2BMLdv028fxCErFyi8KXFM%2BddU%3D", oauth_version="1.0"';
+      var nonce = "testnonce";
+      var signature_method = 'PLAINTEXT';
+
+      var request_params = 'oauth_consumer_key='+consumer_key+'&oauth_nonce='+nonce+'&oauth_signature_method='+signature_method+'&oauth_timestamp='+timestamp;
+      
+      console.log(request_params);
+
+      var hash_key = consumer_key + "&" + consumerSecret;
+      var signature_plaintext = consumerSecret + "&";
+      var signature_raw = 'POST&'+encoded_base_uri+'&'+request_params;
+      var signature = crypto.createHmac('sha1', hash_key).update(signature_raw).digest('base64');
+     // var signature = 'c0d3edb74acf155cef0e671e2c0b5f9def71d337'; 
+      console.log('========SIGNATURE\n'+signature);
+     
+      var oauth_header = 'OAuth oauth_consumer_key="'+consumer_key+'", oauth_nonce="'+nonce+'", oauth_signature_method="'+signature_method+'", oauth_timestamp="'+timestamp+'",  oauth_signature="'+signature_plaintext+'", oauth_version="1.0"';
+
+      //var oauth_header = 'OAuth oauth_nonce="K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw", oauth_callback="http%3A%2F%2Fmyapp.com%3A3005%2Ftwitter%2Fprocess_callback", oauth_signature_method="HMAC-SHA1", oauth_timestamp="'+timestamp+'", oauth_consumer_key="'+consumer_key+'", oauth_signature="Pc%2BMLdv028fxCErFyi8KXFM%2BddU%3D", oauth_version="1.0"';
  
       request(app)
         .post('/oauth/request_token')
+        .set('Content-Type', 'Content-Type: application/x-www-form-urlencoded')
         .set('Authorization', oauth_header)        
         .end(function(err, res) {
           console.log(res.header);  

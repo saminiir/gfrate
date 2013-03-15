@@ -13,7 +13,8 @@
     "passport": "*",
     "passport-local": "0.1.x",
     "passport-http-oauth": "0.1.x",
-    "connect-ensure-login": "0.1.x"
+    "connect-ensure-login": "0.1.x",
+    "crypto": "*"
   },
   "devDependencies": {
     "mocha": "*",

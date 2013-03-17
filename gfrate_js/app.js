@@ -4,6 +4,8 @@ var express = require('express')
   , oauth = require('./oauth')
   , path = require('path');
 
+debugger;
+
 var app = express();
 app.configure(function(){
     app.use(express.logger('dev'));

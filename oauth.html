@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-md5.js"></script>
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha1.js"></script>
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha256.js"></script>
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha512.js"></script>
+
+
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    </head>
+    <body>
+        <script>
+
+
+            $(document).ready(function() {
+                console.log("test");
+                $('#esanNappi').click(function() {
+                    oauth();
+                });
+            });
+
+            function oauth(){
+
+                console.log("JEE Esa JEE");
+
+               //Unix time
+                var foo = new Date; // Generic JS date object
+                var unixtime_ms = foo.getTime(); // Returns milliseconds since the epoch
+                var unixtime = parseInt(unixtime_ms / 1000);
+
+                var callBackURL = "oob"; //oob for now
+                var nonce = "12342897";
+
+                var consumer_key = "abc123";
+                var consumerSecret = 'ssh-secret';
+
+                //Create Signature Base String using formula
+                var baseSign = "POST" + "&" + encodeURIComponent("http://127.0.0.1:3457/oauth/request_token").toString() + "&"
+                 + encodeURIComponent("oauth_callback") + "%3D" + encodeURIComponent(callBackURL)
+                 + "%26"
+                 + encodeURIComponent("oauth_consumer_key") + "%3D" + encodeURIComponent(consumer_key)
+                 + "%26"
+                 + encodeURIComponent("oauth_nonce") + "%3D" + encodeURIComponent(nonce)
+                 + "%26"
+                 + encodeURIComponent("oauth_signature_method") + "%3D" + encodeURIComponent("HMAC-SHA1")
+                 + "%26"
+                 + encodeURIComponent("oauth_timestamp") + "%3D" + encodeURIComponent(unixtime)
+                 + "%26"
+                 + encodeURIComponent("oauth_version") + "%3D" + encodeURIComponent("1.0");
+
+                //Create Signature, With consumer Secret key we sign the signature base string
+                //var signature = b64_hmac_sha1("********secrete key****************", baseSign);
+
+                var hash_key = consumerSecret + "&";
+                var signature = CryptoJS.HmacSHA1(baseSign, hash_key).toString();
+
+                console.log(signature.toString());
+
+                //Build headers from signature
+                var jsonData = JSON.stringify({
+                    Authorization: {
+                        oauth_nonce: nonce,
+                        oauth_callback: encodeURIComponent(callBackURL),
+                        oauth_signature_method: "HMAC-SHA1",
+                        oauth_timestamp: unixtime,
+                        oauth_consumer_key: consumer_key,
+                        oauth_signature: signature,
+                        oauth_version: "1.0"
+                    }
+                });
+
+ 
+                //Request Access Token
+                $.ajax({
+                    url: "http://localhost:5000/oauth/request_token",
+                    type: "POST",
+                    dataType: "jsonp",
+                    jsonp: false,
+                    headers: jsonData,
+                    processData: false,
+                    cache : true,
+                    success: function (data) {
+                        alert(data);
+                    },
+                    error: function (data) {
+                        alert(data.toString());
+                    }
+                });
+            }
+        </script>
+        <button type="button" id="esanNappi">Esan nappi</button>
+    </body>
+</html>

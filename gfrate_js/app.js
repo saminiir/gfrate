@@ -37,6 +37,7 @@ app.get('/authorize', oauth.userAuthorization);
 app.post('/authorize/decision', oauth.userDecision);
 
 app.post('/oauth/request_token', oauth.requestToken);
+app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 
 var port = process.env.PORT || 5000;

@@ -64,8 +64,6 @@ exports.requestToken = [
   server.requestToken(function(client, callbackURL, done) {
     var token = utils.uid(8)
       , secret = utils.uid(32)
-
-      console.log("SECRET IS: " + secret);
     
     db.requestTokens.save(token, secret, client.id, callbackURL, function(err) {
       if (err) { return done(err); }

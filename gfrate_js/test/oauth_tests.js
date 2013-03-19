@@ -40,6 +40,7 @@ describe('oauth', function() {
       var signature = crypto.createHmac('sha1', hash_key).update(signature_raw).digest('base64');
       console.log('========SIGNATURE\n'+signature_raw);
      
+      console.log(signature);
       var oauth_header = 'OAuth oauth_consumer_key="'+consumer_key+'", oauth_nonce="'+nonce+'", oauth_signature_method="'+signature_method+'", oauth_timestamp="'+timestamp+'",  oauth_signature="'+signature+'", oauth_version="1.0"';
  
       request(app)

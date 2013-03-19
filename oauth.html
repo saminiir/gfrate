@@ -11,16 +11,17 @@
         <meta name="viewport" content="width=device-width">
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-md5.js"></script>
-        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha1.js"></script>
-        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha256.js"></script>
-        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha512.js"></script>
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/components/core-min.js"></script>
+       <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/hmac-sha1.js"></script> 
+        <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/components/enc-base64-min.js"></script>
+
 
 
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     </head>
     <body>
+
         <script>
 
 
@@ -47,9 +48,7 @@
                 var consumerSecret = 'ssh-secret';
 
                 //Create Signature Base String using formula
-                var baseSign = "POST" + "&" + encodeURIComponent("http://127.0.0.1:3457/oauth/request_token").toString() + "&"
-                 + encodeURIComponent("oauth_callback") + "%3D" + encodeURIComponent(callBackURL)
-                 + "%26"
+                var baseSign = "GET" + "&" + encodeURIComponent("http://localhost:5000/oauth/request_token").toString() + "&"
                  + encodeURIComponent("oauth_consumer_key") + "%3D" + encodeURIComponent(consumer_key)
                  + "%26"
                  + encodeURIComponent("oauth_nonce") + "%3D" + encodeURIComponent(nonce)
@@ -64,9 +63,9 @@
                 //var signature = b64_hmac_sha1("********secrete key****************", baseSign);
 
                 var hash_key = consumerSecret + "&";
-                var signature = CryptoJS.HmacSHA1(baseSign, hash_key).toString();
+                var signature = CryptoJS.HmacSHA1(baseSign, hash_key).toString(CryptoJS.enc.Base64);
 
-                console.log(signature.toString());
+                console.log(signature);
 
                 //Build headers from signature
                 var jsonData = JSON.stringify({
@@ -81,18 +80,34 @@
                     }
                 });
 
+                var params_get = "oauth_nonce=" + nonce +
+                                 "&oauth_signature_method=HMAC-SHA1" +
+                                 "&oauth_timestamp="+unixtime +
+                                 "&oauth_consumer_key="+consumer_key +
+                                 "&oauth_signature="+ encodeURIComponent(signature) +
+                                 "&oauth_version=1.0";
+
+                console.log(params_get);
  
                 //Request Access Token
                 $.ajax({
                     url: "http://localhost:5000/oauth/request_token",
-                    type: "POST",
+                    type: "GET",
                     dataType: "jsonp",
                     jsonp: false,
-                    headers: jsonData,
+                    cache: true,
+                    contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                    data: params_get,
                     processData: false,
                     cache : true,
                     success: function (data) {
                         alert(data);
+                    },
+                    complete: function (data) {
+                        console.log(data);
+                    },
+                    abort: function (data) {
+                        console.log(data);
                     },
                     error: function (data) {
                         alert(data.toString());
@@ -101,5 +116,7 @@
             }
         </script>
         <button type="button" id="esanNappi">Esan nappi</button>
+
+
     </body>
 </html>

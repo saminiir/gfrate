@@ -9,7 +9,6 @@ exports.index = function(req, res){
 };
 
 exports.loginForm = function(req, res){
-  debugger;
   res.render('login', { title: 'Login' });
 };
 

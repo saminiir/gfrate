@@ -33,8 +33,8 @@ app.get('/login', routes.loginForm);
 app.post('/login', routes.loginValidation);
 app.get('/logout', routes.logout);
 
-app.get('/authorize', oauth.userAuthorization);
-app.post('/authorize/decision', oauth.userDecision);
+app.get('/dialog/authorize', oauth.userAuthorization);
+app.post('/dialog/authorize/decision', oauth.userDecision);
 
 app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);

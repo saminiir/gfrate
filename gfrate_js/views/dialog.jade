@@ -1,8 +1,5 @@
-extends layout
-
-block content
-  p Hi #{user}
-  p #{client} is requesting access to your account.
+  p Hi #{user.name}
+  p #{client.name} is requesting access to your account.
   p Do you approve?
   
   form(action="/dialog/authorize/decision", method="post")

@@ -1,9 +1,9 @@
-  p Hi #{user.name}
-  p #{client.name} is requesting access to your account.
-  p Do you approve?
+p Hi #{user.name}
+p #{client.name} is requesting access to your account.
+p Do you approve?
   
-  form(action="/dialog/authorize/decision", method="post")
-    input(type="hidden", name="transaction_id", value="#{transactionID}")
-    div
-      input(type="submit", value="Allow", id="allow")
-      input(type="submit", value="Deny", name="cancel", id="deny")
+form(action="/dialog/authorize/decision", method="post")
+  input(type="hidden", name="transaction_id", value="#{transactionID}")
+  div
+    input(type="submit", value="Allow", id="allow")
+    input(type="submit", value="Deny", name="cancel", id="deny")

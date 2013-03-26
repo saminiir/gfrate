@@ -37,6 +37,7 @@ app.post('/dialog/authorize/decision', oauth.userDecision);
 app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
+app.get('/oauth/access_token', oauth.accessToken);
 
 var port = process.env.PORT || 5001;
 app.listen(port, function() {

@@ -12,7 +12,7 @@ app.configure(function(){
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
+    app.set('view engine', 'ejs');
     app.use(express.session({ secret: 'secret' }));
     app.use(passport.initialize());
     app.use(passport.session());

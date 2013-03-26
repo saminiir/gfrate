@@ -4,8 +4,6 @@ var express = require('express')
   , oauth = require('./oauth')
   , path = require('path');
 
-debugger;
-
 var app = express();
 app.configure(function(){
     app.use(express.logger('dev'));
@@ -40,7 +38,7 @@ app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 
-var port = process.env.PORT || 5000;
+var port = process.env.PORT || 5001;
 app.listen(port, function() {
   console.log("Listening on " + port);
 });

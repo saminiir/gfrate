@@ -18,6 +18,10 @@ VIOLETS
 #D8FFBF
 #B1FF80
 
+PURPLES IN USE
+#59011c
+#3d000e
+
 */
 
 @base: #FFF;
@@ -48,6 +52,15 @@ VIOLETS
 .scale { max-width: 85%;}
 .softenText { text-shadow: 0 0 1px rgba(125, 125, 125, 0.5); }
 
+* {
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+}
+
+* {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
 html, body {height: 100%;}
 
 body {
@@ -55,6 +68,7 @@ body {
 	font-family: "Fjalla One", sans-serif;
 	background: @white;
 	color: @white;
+	text-shadow: 2px 2px 2px black !important;
 }
 
 #wrap {
@@ -63,19 +77,29 @@ body {
 	width: 100%;
 	position: relative;
 
-	section {
-		background: @black;
+	.big {
+		//font-size: 125%;
 	}
 
-	#upper {
+	#hero {
+		background: #59011c; /* Old browsers */
+		background: -moz-radial-gradient(center, ellipse cover,  #59011c 0%, #3d000e 100%); /* FF3.6+ */
+		background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#59011c), color-stop(100%,#3d000e)); /* Chrome,Safari4+ */
+		background: -webkit-radial-gradient(center, ellipse cover,  #59011c 0%,#3d000e 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-radial-gradient(center, ellipse cover,  #59011c 0%,#3d000e 100%); /* Opera 12+ */
+		background: -ms-radial-gradient(center, ellipse cover,  #59011c 0%,#3d000e 100%); /* IE10+ */
+		background: radial-gradient(ellipse at center,  #59011c 0%,#3d000e 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#59011c', endColorstr='#3d000e',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.5) inset;
 		position:absolute;
-		height: 50%;
+		height: 70%;
 		width: 100%;
 		line-height: 1.5;
 		z-index: 100;
 		#score {
-			font-size: 16em;
-			&:first-letter { font-size: 120%;}
+			font-size: 8em;
+			&:first-letter { font-size: 125%;}
 		}
 		#description { 
 			font-size: 4em;
@@ -83,52 +107,61 @@ body {
 		}
 		#rank { font-size: 2em;}
 	}
-	#middle {
-		position:absolute;
-		top: 50%;
-		width: 100%;
-		height: 25%;
-		font-size: 2em;
-		line-height: 0;
-		border-top: 1px solid @white;
-		z-index: 100;
-		border-bottom: 1px solid @white;
-		p { position: relative; top: 50%; width: 100%; }
-	}
-	#lower {
+	#adjustment {
 		position: absolute;
-		top: 75%;
+		top: 85%;
 		width: 100%;
-		height: 25%;
+		height: 15%;
 		margin: 0;
-		button { 
-			background: @black;
-			font-size: 10em;
-			width: 100%;
-			height: 100%;
-			border: 0;
-			line-height: 0;
-			vertical-align: middle;
-
-	   }
-		button:hover {
-			background: white;
-		}
-		button:active {
-			background: white;
-		}
+		z-index: 100;
 		#plus {
 			.left;
+			font-size: 6em;
 			width: 50%;
 			height: 100%;
-			button { color: #6ccef3; border-right: 1px solid @white;}
+			color: #f5bd27; border-right: 1px solid #3d000e;
 		}
 		#minus {
 			.right;
+			font-size: 6em;
 			width: 50%;
 			height: 100%;
-			button { color: #f5bd27;}
+			color: #6ccef3;			
 		}
 	}
+	#update {
+		border-top: 1px solid #3d000e;
+		position:absolute;
+		top: 70%;
+		width: 100%;
+		height: 15%;
+		font-size: 1em;
+		line-height: 0;
+		z-index: 100;
+		p { position: relative; top: 50%; width: 100%;}
+	}
+	button { 
+		font-family: "Fjalla one", sans-serif;
+		color: @white;
+		font-size: 2em;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		line-height: 0;
+		vertical-align: middle;
+		text-shadow: 2px 2px 2px black !important;
 
+		background: #59011c; /* Old browsers */
+		background: -moz-linear-gradient(top,  #59011c 0%, #3d000e 100%); /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#59011c), color-stop(100%,#3d000e)); /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top,  #59011c 0%,#3d000e 100%); /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top,  #59011c 0%,#3d000e 100%); /* Opera 11.10+ */
+		background: -ms-linear-gradient(top,  #59011c 0%,#3d000e 100%); /* IE10+ */
+		background: linear-gradient(to bottom,  #59011c 0%,#3d000e 100%); /* W3C */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#59011c', endColorstr='#3d000e',GradientType=0 ); /* IE6-9 */
+	}
+	.button-active, button:active {
+		box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5) inset;
+		background: #3d000e; /* Old browsers */
+	}
 }

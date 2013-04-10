@@ -31,7 +31,7 @@ app.post('/login', routes.loginValidation);
 app.get('/logout', routes.logout);
 
 app.get('/dialog/authorize', oauth.userAuthorization);
-app.post('/dialog/authorize/decision', oauth.userDecision);
+app.post('/dialog/authorize/decision', routes.loginValidation);
 
 app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);
@@ -39,7 +39,7 @@ app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
 
 var port = process.env.PORT || 5001;
-app.listen(port, '0.1.0.0', function() {
+app.listen(port, function() {
   console.log("Listening on " + port);
 });
 

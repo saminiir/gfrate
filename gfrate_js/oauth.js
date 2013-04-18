@@ -104,10 +104,10 @@ exports.accessToken = [
     function(client, requestToken, info, done) {
       if (!info.approved) { return done(null, false); }
       if (client.id !== info.clientID) { return done(null, false); }
-      
+
       var token = utils.uid(16)
         , secret = utils.uid(64)
-  
+
       db.accessTokens.save(token, secret, info.userID, info.clientID, function(err) {
         if (err) { return done(err); }
         return done(null, token, secret);
@@ -140,7 +140,7 @@ exports.accessToken = [
 // the application's responsibility to authenticate the user and render a dialog
 // to obtain their approval (displaying details about the client requesting
 // authorization).  We accomplish that here by routing through `ensureLoggedIn()`
-// first, and rendering the `dialog` view. 
+// first, and rendering the `dialog` view.
 
 exports.userAuthorization = [
   login.ensureLoggedIn(),

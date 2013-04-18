@@ -1,0 +1,24 @@
+D:\Koodaus\gfrate-master\RMP\gen\com\esajuhana\ratemypartner\R.java \
+ : D:\Koodaus\gfrate-master\RMP\res\drawable-hdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\res\drawable-mdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\res\drawable-xhdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\res\drawable-xxhdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\res\layout\activity_login.xml \
+D:\Koodaus\gfrate-master\RMP\res\layout\activity_login_oauth.xml \
+D:\Koodaus\gfrate-master\RMP\res\layout\activity_main.xml \
+D:\Koodaus\gfrate-master\RMP\res\menu\login.xml \
+D:\Koodaus\gfrate-master\RMP\res\menu\main.xml \
+D:\Koodaus\gfrate-master\RMP\res\values\dimens.xml \
+D:\Koodaus\gfrate-master\RMP\res\values\strings.xml \
+D:\Koodaus\gfrate-master\RMP\res\values\strings_activity_login.xml \
+D:\Koodaus\gfrate-master\RMP\res\values\styles.xml \
+D:\Koodaus\gfrate-master\RMP\res\values-large\styles.xml \
+D:\Koodaus\gfrate-master\RMP\res\values-sw600dp\dimens.xml \
+D:\Koodaus\gfrate-master\RMP\res\values-sw720dp-land\dimens.xml \
+D:\Koodaus\gfrate-master\RMP\res\values-v11\styles.xml \
+D:\Koodaus\gfrate-master\RMP\res\values-v14\styles.xml \
+D:\Koodaus\gfrate-master\RMP\bin\res\drawable-hdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\bin\res\drawable-mdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\bin\res\drawable-xhdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\bin\res\drawable-xxhdpi\ic_launcher.png \
+D:\Koodaus\gfrate-master\RMP\bin\AndroidManifest.xml \

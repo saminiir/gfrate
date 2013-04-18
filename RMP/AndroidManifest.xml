@@ -29,6 +29,10 @@
             <meta-data android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.esajuhana.ratemypartner.MainActivity" />
         </activity>
+        <activity
+            android:name=".LoginOAuthActivity"
+            android:theme="@android:style/Theme.NoTitleBar" />
     </application>
-
+    
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

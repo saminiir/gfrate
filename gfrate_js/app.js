@@ -32,6 +32,7 @@ app.get('/logout', routes.logout);
 
 app.get('/dialog/authorize', oauth.userAuthorization);
 app.post('/dialog/authorize/decision', oauth.userDecision);
+app.post('/dialog/authorize/decision', oauth.userDecisionReturn);
 
 app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);

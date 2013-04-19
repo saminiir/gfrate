@@ -182,3 +182,29 @@ exports.userDecision = [
     });
   })
 ]
+
+// user decision endpoint #2
+exports.userDecisionReturn = [
+      login.ensureLoggedIn(),
+      function(req, res, params) {
+                    if (!req.oauth.res.allow)
+                    {
+                      req.logout();
+                      // Maybe actual "denied" page..
+                      return res.redirect('/');
+                    }
+
+                    // v1.0a oauth_token + oauth_verifier (well, consumer already knows the token...)
+                    params = params || {};
+                    params['oauth_token'] = req.oauth.authz.token;
+                    params['oauth_verifier'] = req.oauth.verifier;
+                    var fue = Object.keys(params).map(function(key) {
+                      return utils.encode(key) + '=' + utils.encode(params[key]);
+                    }).join('&');
+
+                    res.setHeader('Content-Type', 'x-www-form-urlencoded');
+                    res.setHeader('Cache-Control', 'no-store');
+                    res.setHeader('Pragma', 'no-cache');
+                    res.end(fue);
+      }
+]

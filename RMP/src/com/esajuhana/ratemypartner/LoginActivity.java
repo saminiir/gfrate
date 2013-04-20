@@ -308,12 +308,15 @@ public class LoginActivity extends Activity {
 
         @Override
         protected String doInBackground(String... params) {
-            if (params.length < 2) {
+            if (params.length < 1) {
                 return "";
             }
             
-            String test = OAUTH.getAccessToken(mOAuthBaseUri + "/oauth/access_token", params[0], params[1]);
-
+            String test = OAUTH.getAccessToken(mOAuthBaseUri + "/oauth/access_token", params[0]);
+            
+            // Test for getting a protected resource after succesful authentication
+            Log.v(TAG, "Got protected resource: " + OAUTH.getProtectedResource(mOAuthBaseUri + "/api/test", null));
+            
             return test;
         }
 

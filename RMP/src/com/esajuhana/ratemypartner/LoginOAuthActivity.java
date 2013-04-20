@@ -28,20 +28,17 @@ public class LoginOAuthActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (url.contains("oauth_verifier=") && url.contains("oauth_token=")) {
+                if (url.contains("oauth_verifier=")) {
                     Log.v(TAG, "onPageFinished found URL: " + url);
 
                     Uri uri = Uri.parse(url);
-                    String token = uri.getQueryParameter("oauth_token");
                     String verifier = uri.getQueryParameter("oauth_verifier");
 
-                    if (token != null && verifier != null) {
+                    if (verifier != null) {
                         Log.v(TAG, "onPageFinished found verifier: " + verifier);
-                        Log.v(TAG, "onPageFinished found token: " + token);
 
                         Intent resultData = new Intent();
                         resultData.putExtra("oauth_verifier", verifier);
-                        resultData.putExtra("oauth_token", token);
                         setResult(Activity.RESULT_OK, resultData);
 
                         finish();

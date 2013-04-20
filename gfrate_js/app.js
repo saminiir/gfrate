@@ -2,7 +2,8 @@ var express = require('express')
   , passport = require('passport')
   , routes = require('./routes')
   , oauth = require('./oauth')
-  , path = require('path');
+  , path = require('path')
+  , test = require('./test');
 
 var app = express();
 app.configure(function(){
@@ -39,6 +40,8 @@ app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
+
+app.get('/api/test', test.info);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

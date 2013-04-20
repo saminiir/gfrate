@@ -23,10 +23,15 @@ import com.esajuhana.ratemypartner.oauth.OAuth;
 /**
  * Activity which displays a login screen to the user, offering registration as
  * well.
+ * TODO: Refactor (strange mix of OAuth and original login-view)
  */
 public class LoginActivity extends Activity {
+
     private static final String TAG = "LoginActivity";
+    private static final int VERIFIER_REQUEST_ID = 1;
+    private final OAuth OAUTH = new OAuth("abc123", "ssh-secret");
     private String mOAuthBaseUri = "http://10.0.2.2:5000";
+ 
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -93,7 +98,7 @@ public class LoginActivity extends Activity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        new OAuthTask().execute();
+                        new OAuthRequestTokenTask().execute();
                     }
                 });
 
@@ -284,12 +289,11 @@ public class LoginActivity extends Activity {
         }
     }
 
-    private class OAuthTask extends AsyncTask<Void, Void, String> {
+    private class OAuthRequestTokenTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... params) {
-            OAuth oauth = new OAuth("abc123", "ssh-secret");
-            String test = oauth.getRequestToken(mOAuthBaseUri + "/oauth/request_token");
+            String test = OAUTH.getRequestToken(mOAuthBaseUri + "/oauth/request_token");
 
             return test;
         }
@@ -315,10 +319,44 @@ public class LoginActivity extends Activity {
             String uriAuthorize = mOAuthBaseUri + "/dialog/authorize?" + splitResult[0];
 
             Log.v(TAG, "uri: " + uriAuthorize);
-            
+
             Intent intent = new Intent(this, LoginOAuthActivity.class);
-            intent.putExtra("uri",uriAuthorize);
-            startActivity(intent);
+            intent.putExtra("uri", uriAuthorize);
+
+            startActivityForResult(intent, VERIFIER_REQUEST_ID);
+        }
+    }
+    
+    private class OAuthAccessTokenTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            if (params.length < 2) {
+                return "";
+            }
+            
+            String test = OAUTH.getAccessToken(mOAuthBaseUri + "/oauth/access_token", params[0], params[1]);
+
+            return test;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.v(TAG, "Got access token: " + result);
+        }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+            Intent data) {
+        if (requestCode == VERIFIER_REQUEST_ID) {
+            if (resultCode == RESULT_OK) {
+                String verifier = data.getStringExtra("oauth_verifier");
+                String token = data.getStringExtra("oauth_token");
+                Log.v(TAG, "Verifier got here: " + verifier);
+                Log.v(TAG, "Token got here: " + token);
+                new OAuthAccessTokenTask().execute(verifier, token);
+            }
         }
     }
 }

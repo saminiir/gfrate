@@ -3,6 +3,7 @@ package com.esajuhana.ratemypartner;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -13,7 +14,7 @@ import android.webkit.WebViewClient;
 public class LoginOAuthActivity extends Activity {
 
     private static final String TAG = "LoginOAuthActivity";
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,39 +22,35 @@ public class LoginOAuthActivity extends Activity {
 
         Intent intent = getIntent();
         String uri = intent.getStringExtra("uri");
-
+        
         WebView webView = (WebView) findViewById(R.id.webview);
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (url.contains("&oauth_verifier=") && url.contains("?oauth_token=")) {
+                    Log.v(TAG, "onPageFinished found URL: " + url);
+                    
+                    // TODO: Transform url-string to Uri-object and get query parameters
+                    
+                    int tokenIndexStart = url.indexOf("?oauth_token=") + "?oauth_token=".length();
+                    int verifierIndexStart = url.indexOf("&oauth_verifier=");
+                    
+                    String oauth_token = url.substring(tokenIndexStart, verifierIndexStart);
+                    String oauth_verifier = url.substring(verifierIndexStart + 16, url.length());
+                    
+                    Log.v(TAG, "onPageFinished found verifier: " + oauth_verifier);
+                    Log.v(TAG, "onPageFinished found token: " + oauth_token);
+                    
+                    Intent resultData = new Intent();
+                    resultData.putExtra("oauth_verifier", oauth_verifier);
+                    resultData.putExtra("oauth_token", oauth_token);
+                    setResult(Activity.RESULT_OK, resultData);
+                    
+                    finish();
+                }
+                super.onPageFinished(view, url);
+            }
+        });
         webView.loadUrl(uri);
     }
-    
-    /*
-    private class LoginOAuthWebViewClient extends WebViewClient {
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        if (Uri.parse(url).getHost().equals("10.0.2.2)) {
-            // Let load the page
-            return false;
-        }
-        // Otherwise
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
-        return true;
-    }
-    // 
-    // AND
-    @Override
-public void onLoadResource(WebView view, String url)
-{
-    if (url.equals("http://redirect"))
-    {
-        //do SOMETHING
-    }
-    else
-    {
-        super.onLoadResource(view, url);
-    }           
-}
-}
-* */
 }

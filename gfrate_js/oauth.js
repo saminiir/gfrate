@@ -5,7 +5,8 @@ var oauthorize = require('oauthorize')
   , passport = require('passport')
   , login = require('connect-ensure-login')
   , db = require('./db')
-  , utils = require('./utils');
+  , utils = require('./utils')
+  , qs = require('querystring');;
 
 
 // create OAuth server
@@ -194,7 +195,8 @@ exports.userDecisionReturn = [
                       return res.redirect('/');
                     }
 
-                    // v1.0a oauth_token + oauth_verifier (well, consumer already knows the token...)
+                    // v1.0 oauth_token + oauth_verifier (well, consumer already knows the token...)
+                    /*
                     params = params || {};
                     params['oauth_token'] = req.oauth.authz.token;
                     params['oauth_verifier'] = req.oauth.verifier;
@@ -206,5 +208,12 @@ exports.userDecisionReturn = [
                     res.setHeader('Cache-Control', 'no-store');
                     res.setHeader('Pragma', 'no-cache');
                     res.end(fue);
+                    */
+
+                    //redirect to GET
+                    //TODO: Redirect to callback?
+                    var getParams = qs.stringify({ oauth_token: req.oauth.authz.token, oauth_verifier: req.oauth.verifier });
+                    res.redirect('/dialog/authorize/decision?' + getParams);
+
       }
 ]

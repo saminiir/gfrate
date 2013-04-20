@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -29,6 +30,7 @@ public class OAuth {
     private String mConsumerSecret;
     private String mOauthVersion = "1.0";
     private String mOauthSignatureMethod = "HMAC-SHA1";
+    private String mTokenSecret = "";
     private static Random sRandom = new Random();
 
     /**
@@ -49,7 +51,7 @@ public class OAuth {
      * @param mApiRequestTokenUrl
      * @return result body that the server returned
      */
-    public String getRequestToken(String mApiRequestTokenUrl) {
+    public String getRequestToken(String requestTokenUrl) {
 
         String timestamp = ((Long) getTimestamp()).toString();
         String nonce = ((Long) getNonce()).toString();
@@ -57,9 +59,10 @@ public class OAuth {
         StringBuilder ba = new StringBuilder("POST&");
 
         try {
-            ba.append(URLEncoder.encode(mApiRequestTokenUrl, "UTF-8"));
+            ba.append(URLEncoder.encode(requestTokenUrl, "UTF-8"));
             ba.append("&");
-            ba.append(URLEncoder.encode("oauth_consumer_key=" + mConsumerKey
+            ba.append(URLEncoder.encode("oauth_callback=oob"
+                    + "&oauth_consumer_key=" + mConsumerKey
                     + "&oauth_nonce=" + nonce
                     + "&oauth_signature_method=" + mOauthSignatureMethod
                     + "&oauth_timestamp=" + timestamp
@@ -72,36 +75,78 @@ public class OAuth {
         String hashkey = mConsumerSecret + "&";
         String signature = getHmacShaSignature(basestring, hashkey);
 
-        String headerAuth = "OAuth oauth_nonce=\"" + nonce
+        String headerAuth = "OAuth oauth_callback=\"oob"
+                + "\", oauth_consumer_key=\"" + mConsumerKey
+                + "\", oauth_nonce=\"" + nonce
+                + "\", oauth_signature=\"" + signature
                 + "\", oauth_signature_method=\"" + mOauthSignatureMethod
                 + "\", oauth_timestamp=\"" + timestamp
-                + "\", oauth_consumer_key=\"" + mConsumerKey
-                + "\", oauth_signature=\"" + signature
                 + "\", oauth_version=\"" + mOauthVersion + "\"";
-
-        String result = null;
 
         Log.v(TAG, "headerAuth: " + headerAuth);
 
+        String result = getHttpResult(requestTokenUrl, headerAuth, "Authorization");
+        
+        // TODO: better method for token and token secret extraction
+        // TODO: save both as private fields
+        if (result != null) {
+            String[] resultSplit = result.split("&");
+            
+            if (resultSplit.length < 3) {
+                Log.v(TAG, "resultSplit is too short!");
+                return result;
+            }
+            
+            String[] tokenSecretSplit = resultSplit[1].split("=");
+            
+            if (tokenSecretSplit.length < 2) {
+                Log.v(TAG, "tokenSecretSplit is too short!");
+                return result;
+            }
+            
+            mTokenSecret = tokenSecretSplit[1];
+            Log.v(TAG, "Got tokenSecret = " + mTokenSecret);
+        }
+        
+        return result;
+    }
+
+    public String getAccessToken(String accessTokenUrl, String verifier, String token) {
+        String timestamp = ((Long) getTimestamp()).toString();
+        String nonce = ((Long) getNonce()).toString();
+
+        StringBuilder ba = new StringBuilder("POST&");
+
         try {
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), TIMEOUT);
-            HttpPost httpPost = new HttpPost(mApiRequestTokenUrl);
-            httpPost.setHeader("Authorization", headerAuth);
-            HttpResponse response = httpClient.execute(httpPost);
-
-            result = EntityUtils.toString(response.getEntity());
-
-            Log.v(TAG, result == null ? "" : result);
-        } catch (ClientProtocolException e) {
-            Log.v(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.v(TAG, e.getMessage());
-        } catch (IllegalStateException e) {
-            Log.v(TAG, e.getMessage());
+            ba.append(URLEncoder.encode(accessTokenUrl, "UTF-8"));
+            ba.append("&");
+            ba.append(URLEncoder.encode("oauth_consumer_key=" + mConsumerKey
+                    + "&oauth_nonce=" + nonce
+                    + "&oauth_signature_method=" + mOauthSignatureMethod
+                    + "&oauth_timestamp=" + timestamp
+                    + "&oauth_token=" + token
+                    + "&oauth_verifier=" + verifier
+                    + "&oauth_version=" + mOauthVersion, "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            Log.v(TAG, "UnsupportedEncodingException: " + ex.getMessage());
         }
 
-        return result;
+        String basestring = ba.toString();
+        String hashkey = mConsumerSecret + "&" + mTokenSecret;
+        String signature = getHmacShaSignature(basestring, hashkey);
+
+        String headerAuth = "OAuth oauth_consumer_key=\"" + mConsumerKey
+                + "\", oauth_nonce=\"" + nonce
+                + "\", oauth_signature_method=\"" + mOauthSignatureMethod
+                + "\", oauth_signature=\"" + signature
+                + "\", oauth_timestamp=\"" + timestamp
+                + "\", oauth_token=\"" + token
+                + "\", oauth_verifier=\"" + verifier
+                + "\", oauth_version=\"" + mOauthVersion + "\"";
+
+        Log.v(TAG, "headerAuth: " + headerAuth);
+
+        return getHttpResult(accessTokenUrl, headerAuth, "Authorization");
     }
 
     private static long getNonce() {
@@ -124,6 +169,30 @@ public class OAuth {
             result = Base64.encodeToString(rawHmac, Base64.NO_WRAP);
         } catch (Exception e) {
             // TODO 
+        }
+
+        return result;
+    }
+
+    private String getHttpResult(String url, String headerContent, String headerName) throws ParseException {
+        String result = null;
+
+        try {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), TIMEOUT);
+            HttpPost httpPost = new HttpPost(url);
+            httpPost.setHeader(headerName, headerContent);
+            HttpResponse response = httpClient.execute(httpPost);
+
+            result = EntityUtils.toString(response.getEntity());
+
+            Log.v(TAG, result == null ? "" : result);
+        } catch (ClientProtocolException e) {
+            Log.v(TAG, e.getMessage());
+        } catch (IOException e) {
+            Log.v(TAG, e.getMessage());
+        } catch (IllegalStateException e) {
+            Log.v(TAG, e.getMessage());
         }
 
         return result;

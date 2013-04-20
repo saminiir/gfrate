@@ -20,3 +20,8 @@ exports.logout = function(req, res) {
   req.logout();
   res.redirect('/');
 }
+
+exports.verified =[ login.ensureLoggedIn(), function(req, res){
+  res.render('verified', { title: 'Verified' });
+}
+  ]

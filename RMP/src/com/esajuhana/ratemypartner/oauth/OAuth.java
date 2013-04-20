@@ -1,5 +1,6 @@
 package com.esajuhana.ratemypartner.oauth;
 
+import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Key;
 import java.util.Random;
+import java.util.TreeMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.http.HttpResponse;
@@ -19,12 +21,13 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 
 /**
- *
+ * OAuth request handler
+ * 
  * @author TODO
  */
 public class OAuth {
 
-    private final String TAG = "OAuth";
+    private final static String TAG = "OAuth";
     private final int TIMEOUT = 10000;
     private String mConsumerKey;
     private String mConsumerSecret;
@@ -48,102 +51,70 @@ public class OAuth {
      * Gets OAuth 1.0 request token from the URL given as a parameter. Uses
      * HTTP-POST.
      *
-     * @param mApiRequestTokenUrl
+     * @param requestTokenUrl
      * @return result body that the server returned
      */
     public String getRequestToken(String requestTokenUrl) {
 
+        mTokenSecret = "";
         String timestamp = ((Long) getTimestamp()).toString();
         String nonce = ((Long) getNonce()).toString();
 
-        StringBuilder ba = new StringBuilder("POST&");
+        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
 
-        try {
-            ba.append(URLEncoder.encode(requestTokenUrl, "UTF-8"));
-            ba.append("&");
-            ba.append(URLEncoder.encode("oauth_callback=oob"
-                    + "&oauth_consumer_key=" + mConsumerKey
-                    + "&oauth_nonce=" + nonce
-                    + "&oauth_signature_method=" + mOauthSignatureMethod
-                    + "&oauth_timestamp=" + timestamp
-                    + "&oauth_version=" + mOauthVersion, "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            Log.v(TAG, "UnsupportedEncodingException: " + ex.getMessage());
-        }
+        headerTreeMap.put("oauth_callback", "oob");
+        headerTreeMap.put("oauth_consumer_key", mConsumerKey);
+        headerTreeMap.put("oauth_signature_method", mOauthSignatureMethod);
+        headerTreeMap.put("oauth_timestamp", timestamp);
+        headerTreeMap.put("oauth_version", mOauthVersion);
+        headerTreeMap.put("oauth_nonce", nonce);
 
-        String basestring = ba.toString();
-        String hashkey = mConsumerSecret + "&";
-        String signature = getHmacShaSignature(basestring, hashkey);
-
-        String headerAuth = "OAuth oauth_callback=\"oob"
-                + "\", oauth_consumer_key=\"" + mConsumerKey
-                + "\", oauth_nonce=\"" + nonce
-                + "\", oauth_signature=\"" + signature
-                + "\", oauth_signature_method=\"" + mOauthSignatureMethod
-                + "\", oauth_timestamp=\"" + timestamp
-                + "\", oauth_version=\"" + mOauthVersion + "\"";
-
-        Log.v(TAG, "headerAuth: " + headerAuth);
+        String signature = getSignature(headerTreeMap, requestTokenUrl);
+        headerTreeMap.put("oauth_signature", signature);
+        String headerAuth = getHeader(headerTreeMap);
 
         String result = getHttpResult(requestTokenUrl, headerAuth, "Authorization");
-        
-        // TODO: better method for token and token secret extraction
-        // TODO: save both as private fields
+
         if (result != null) {
-            String[] resultSplit = result.split("&");
+            Uri uri = Uri.parse(requestTokenUrl + "?" + result);
+            String secret = uri.getQueryParameter("oauth_token_secret");
             
-            if (resultSplit.length < 3) {
-                Log.v(TAG, "resultSplit is too short!");
-                return result;
+            if (secret != null ) {
+                mTokenSecret = secret;
+                Log.v(TAG, "Got tokenSecret = " + mTokenSecret);
             }
-            
-            String[] tokenSecretSplit = resultSplit[1].split("=");
-            
-            if (tokenSecretSplit.length < 2) {
-                Log.v(TAG, "tokenSecretSplit is too short!");
-                return result;
-            }
-            
-            mTokenSecret = tokenSecretSplit[1];
-            Log.v(TAG, "Got tokenSecret = " + mTokenSecret);
         }
-        
+
         return result;
     }
 
+    /**
+     * Gets OAuth 1.0 access token from the URL given as a parameter. Uses
+     * HTTP-POST.
+     * 
+     * @param accessTokenUrl
+     * @param verifier
+     * @param token
+     * @return http body
+     */
     public String getAccessToken(String accessTokenUrl, String verifier, String token) {
         String timestamp = ((Long) getTimestamp()).toString();
         String nonce = ((Long) getNonce()).toString();
 
-        StringBuilder ba = new StringBuilder("POST&");
+        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
 
-        try {
-            ba.append(URLEncoder.encode(accessTokenUrl, "UTF-8"));
-            ba.append("&");
-            ba.append(URLEncoder.encode("oauth_consumer_key=" + mConsumerKey
-                    + "&oauth_nonce=" + nonce
-                    + "&oauth_signature_method=" + mOauthSignatureMethod
-                    + "&oauth_timestamp=" + timestamp
-                    + "&oauth_token=" + token
-                    + "&oauth_verifier=" + verifier
-                    + "&oauth_version=" + mOauthVersion, "UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            Log.v(TAG, "UnsupportedEncodingException: " + ex.getMessage());
-        }
+        headerTreeMap.put("oauth_consumer_key", mConsumerKey);
+        headerTreeMap.put("oauth_nonce", nonce);
+        headerTreeMap.put("oauth_signature_method", mOauthSignatureMethod);
+        headerTreeMap.put("oauth_timestamp", timestamp);
+        headerTreeMap.put("oauth_token", token);
+        headerTreeMap.put("oauth_verifier", verifier);
+        headerTreeMap.put("oauth_version", mOauthVersion);
 
-        String basestring = ba.toString();
-        String hashkey = mConsumerSecret + "&" + mTokenSecret;
-        String signature = getHmacShaSignature(basestring, hashkey);
-
-        String headerAuth = "OAuth oauth_consumer_key=\"" + mConsumerKey
-                + "\", oauth_nonce=\"" + nonce
-                + "\", oauth_signature_method=\"" + mOauthSignatureMethod
-                + "\", oauth_signature=\"" + signature
-                + "\", oauth_timestamp=\"" + timestamp
-                + "\", oauth_token=\"" + token
-                + "\", oauth_verifier=\"" + verifier
-                + "\", oauth_version=\"" + mOauthVersion + "\"";
-
+        String signature = getSignature(headerTreeMap, accessTokenUrl);
+        headerTreeMap.put("oauth_signature", signature);
+        String headerAuth = getHeader(headerTreeMap);
+        
         Log.v(TAG, "headerAuth: " + headerAuth);
 
         return getHttpResult(accessTokenUrl, headerAuth, "Authorization");
@@ -168,7 +139,7 @@ public class OAuth {
             byte[] rawHmac = mac.doFinal(basesign.getBytes());
             result = Base64.encodeToString(rawHmac, Base64.NO_WRAP);
         } catch (Exception e) {
-            // TODO 
+            Log.v(TAG, "Something went from with HMAC-SHA1 encoding: " + e.getMessage());
         }
 
         return result;
@@ -196,5 +167,67 @@ public class OAuth {
         }
 
         return result;
+    }
+
+    private String getSignature(TreeMap<String, String> headerTreeMap, String url) {
+
+        boolean firstKey = true;
+        StringBuilder normalizedParameters = new StringBuilder();
+
+        for (String key : headerTreeMap.keySet()) {
+            if (!firstKey) {
+                normalizedParameters.append("&");
+            }
+            normalizedParameters.append(key);
+            normalizedParameters.append("=");
+            normalizedParameters.append(headerTreeMap.get(key));
+
+            if (firstKey) {
+                firstKey = false;
+            }
+        }
+
+        StringBuilder ba = new StringBuilder();
+
+        try {
+            ba = new StringBuilder("POST&");
+            ba.append(URLEncoder.encode(url, "UTF-8"));
+            ba.append("&");
+            ba.append(URLEncoder.encode(normalizedParameters.toString(), "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            Log.v(TAG, "UnsupportedEncodingException: " + ex.getMessage());
+        }
+
+        String basestring = ba.toString();
+        Log.v(TAG, "Basestring: " + basestring);
+        String hashkey = mConsumerSecret + "&" + mTokenSecret;
+        String signature = getHmacShaSignature(basestring, hashkey);
+
+        return signature;
+    }
+
+    private String getHeader(TreeMap<String, String> headerTreeMap) {
+
+        boolean firstKey = true;
+        StringBuilder header = new StringBuilder();
+
+        header.append("OAuth ");
+
+        for (String key : headerTreeMap.keySet()) {
+            if (!firstKey) {
+                header.append(", ");
+            }
+
+            header.append(key);
+            header.append("=\"");
+            header.append(headerTreeMap.get(key));
+            header.append("\"");
+
+            if (firstKey) {
+                firstKey = false;
+            }
+        }
+
+        return header.toString();
     }
 }

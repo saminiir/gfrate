@@ -288,7 +288,7 @@ public class LoginActivity extends Activity {
             showProgress(false);
         }
     }
-
+    
     private class OAuthRequestTokenTask extends AsyncTask<Void, Void, String> {
 
         @Override
@@ -301,29 +301,6 @@ public class LoginActivity extends Activity {
         @Override
         protected void onPostExecute(String result) {
             OAuthCallbackLogin(result);
-        }
-    }
-
-    private void OAuthCallbackLogin(String result) {
-        Log.v(TAG, "OAuthCallbackLogin called!");
-
-        String[] splitResult = null;
-
-        if (!TextUtils.isEmpty(result)) {
-            splitResult = result.split("&");
-
-            Log.v(TAG, "OAuthCallbackLogin - string is ok and split to " + splitResult.length + " parts");
-        }
-
-        if (splitResult != null && splitResult.length > 1) {
-            String uriAuthorize = mOAuthBaseUri + "/dialog/authorize?" + splitResult[0];
-
-            Log.v(TAG, "uri: " + uriAuthorize);
-
-            Intent intent = new Intent(this, LoginOAuthActivity.class);
-            intent.putExtra("uri", uriAuthorize);
-
-            startActivityForResult(intent, VERIFIER_REQUEST_ID);
         }
     }
     
@@ -359,4 +336,28 @@ public class LoginActivity extends Activity {
             }
         }
     }
+    
+    private void OAuthCallbackLogin(String result) {
+        Log.v(TAG, "OAuthCallbackLogin called!");
+
+        String[] splitResult = null;
+
+        if (!TextUtils.isEmpty(result)) {
+            splitResult = result.split("&");
+
+            Log.v(TAG, "OAuthCallbackLogin - string is ok and split to " + splitResult.length + " parts");
+        }
+
+        if (splitResult != null && splitResult.length > 1) {
+            String uriAuthorize = mOAuthBaseUri + "/dialog/authorize?" + splitResult[0];
+
+            Log.v(TAG, "uri: " + uriAuthorize);
+
+            Intent intent = new Intent(this, LoginOAuthActivity.class);
+            intent.putExtra("uri", uriAuthorize);
+
+            startActivityForResult(intent, VERIFIER_REQUEST_ID);
+        }
+    }
+    
 }

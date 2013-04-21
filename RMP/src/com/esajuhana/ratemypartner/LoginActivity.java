@@ -297,9 +297,9 @@ public class LoginActivity extends Activity {
             String requestToken = "";
 
             try {
-                requestToken = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI);
+                requestToken = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI, null);
             } catch (IllegalStateException ex) {
-                Log.v(TAG, "Wrong state: " + ex);
+                Log.v(TAG, "Wrong state: " + ex.getMessage());
                 OAUTH.resetState();
             }
 
@@ -321,7 +321,7 @@ public class LoginActivity extends Activity {
             try {
                 uriAuthorize = OAUTH.getAuthorizeRequestUri(OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI);
             } catch (IllegalStateException ex) {
-                Log.v(TAG, "Wrong state: " + ex);
+                Log.v(TAG, "Wrong state: " + ex.getMessage());
                 OAUTH.resetState();
                 return;
             }
@@ -351,7 +351,7 @@ public class LoginActivity extends Activity {
                 // Test for getting a protected resource after succesful authentication
                 Log.v(TAG, "Got protected resource: " + OAUTH.accessProtectedResource(OAUTH_BASE_URI + OAUTH_TEST_URI, null, OAuth.HttpRequestType.GET));
             } catch (IllegalStateException ex) {
-                Log.v(TAG, "Wrong state: " + ex);
+                Log.v(TAG, "Wrong state: " + ex.getMessage());
                 OAUTH.resetState();
             }
 

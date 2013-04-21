@@ -76,12 +76,14 @@ public class OAuth {
 
     /**
      * Gets OAuth 1.0 request token from the URL given as a parameter. Uses
-     * HTTP-POST.
+     * HTTP-POST. If provided callbackUrl is null or empty, "oob" (out of band)
+     * will be used.
      *
      * @param requestTokenUrl
+     * @param callbackUrl
      * @return result body that the server returned
      */
-    public String getRequestToken(String requestTokenUrl) {
+    public String getRequestToken(String requestTokenUrl, String callbackUrl) {
 
         // Return token, secret and state to initial values
         mToken = "";
@@ -89,7 +91,12 @@ public class OAuth {
         mState = OAuthState.Init;
 
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
-        headerTreeMap.put("oauth_callback", "oob");
+        
+        if (TextUtils.isEmpty(callbackUrl)) {
+            headerTreeMap.put("oauth_callback", "oob");
+        } else {
+            headerTreeMap.put("oauth_callback", callbackUrl);
+        }
 
         String signature = getSignature(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);

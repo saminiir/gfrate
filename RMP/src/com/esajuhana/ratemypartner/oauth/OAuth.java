@@ -1,6 +1,7 @@
 package com.esajuhana.ratemypartner.oauth;
 
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import java.io.IOException;
@@ -87,8 +88,8 @@ public class OAuth {
         mTokenSecret = "";
         mState = OAuthState.Init;
         
-        String timestamp = ((Long) getTimestamp()).toString();
-        String nonce = ((Long) getNonce()).toString();
+        String timestamp = String.valueOf(getTimestamp());
+        String nonce = String.valueOf(getNonce());
 
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
 
@@ -104,7 +105,7 @@ public class OAuth {
 
         String result = getHttpResult(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
 
-        if (result != null) {
+        if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
             String secret = uri.getQueryParameter("oauth_token_secret");
             String token = uri.getQueryParameter("oauth_token");
@@ -126,7 +127,7 @@ public class OAuth {
     /**
      * Gets OAuth 1.0 access token from the URL given as a parameter. Uses
      * HTTP-POST.
-     * Returns null if user hasn't got a request token.
+     * Throws IllegalStateException if user hasn't got a request token.
      *
      * @param accessTokenUrl
      * @param verifier
@@ -136,11 +137,11 @@ public class OAuth {
     public String getAccessToken(String accessTokenUrl, String verifier) {
         
         if (mState != OAuthState.GotRequestToken){
-            return null;
-        }        
-        
-        String timestamp = ((Long) getTimestamp()).toString();
-        String nonce = ((Long) getNonce()).toString();
+              throw new IllegalStateException("Request token hasn't been retrieved.");
+        } 
+
+        String timestamp = String.valueOf(getTimestamp());
+        String nonce = String.valueOf(getNonce());
 
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
 
@@ -157,7 +158,7 @@ public class OAuth {
         
         String result = getHttpResult(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
         
-        if (result != null) {
+        if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
             String secret = uri.getQueryParameter("oauth_token_secret");
             String token = uri.getQueryParameter("oauth_token");
@@ -179,7 +180,7 @@ public class OAuth {
     /**
      * Gets protected resource from the URL given as a parameter.
      * GET-query parameters can be specified with params-parameter.
-     * Uses HTTP GET. Returns null if user has not authenticated.
+     * Uses HTTP GET. Throws IllegalStateException if user has not authenticated.
      * 
      * @param resourceUrl URL to fetch protected resource
      * @param params HTTP GET query parameters
@@ -188,11 +189,11 @@ public class OAuth {
     public String getProtectedResource(String resourceUrl, Map<String, String> params) {
         
         if (mState != OAuthState.GotAccessToken){
-            return null;
+            throw new IllegalStateException("Access token hasn't been retrieved.");
         }
         
-        String timestamp = ((Long) getTimestamp()).toString();
-        String nonce = ((Long) getNonce()).toString();
+        String timestamp = String.valueOf(getTimestamp());
+        String nonce = String.valueOf(getNonce());
 
         TreeMap<String, String> paramsTreeMap = new TreeMap<String, String>();
 
@@ -224,7 +225,7 @@ public class OAuth {
     }
 
     private String getHttpResult(String url, TreeMap<String, String> params, HttpRequestType requestType) throws ParseException {
-        String result = null;
+        String result = "";
 
         try {
             HttpClient httpClient = new DefaultHttpClient();
@@ -248,14 +249,19 @@ public class OAuth {
                 HttpResponse response = httpClient.execute(httpGet);
                 result = EntityUtils.toString(response.getEntity());
             }
-
-            Log.v(TAG, result == null ? "HttpResponse was empty or failed." : result);
         } catch (ClientProtocolException e) {
             Log.v(TAG, e.getMessage());
         } catch (IOException e) {
             Log.v(TAG, e.getMessage());
         } catch (IllegalStateException e) {
             Log.v(TAG, e.getMessage());
+        }
+        
+        if (!TextUtils.isEmpty(result))
+        {
+            Log.v(TAG, "HTTP-result body was: " + result);
+        } else {
+            Log.v(TAG, "HTTP-result body was empty");
         }
 
         return result;

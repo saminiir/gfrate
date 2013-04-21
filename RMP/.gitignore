@@ -45,3 +45,5 @@ node_modules
 
 # Local Android-settings
 local.properties
+gen
+bin

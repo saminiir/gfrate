@@ -29,9 +29,15 @@ public class LoginActivity extends Activity {
 
     private static final String TAG = "LoginActivity";
     private static final int VERIFIER_REQUEST_ID = 1;
+    
     private final OAuth OAUTH = new OAuth("abc123", "ssh-secret");
-    private String mOAuthBaseUri = "http://10.0.2.2:5000";
- 
+    
+    private final String OAUTH_BASE_URI = "http://10.0.2.2:5000";
+    private final String OAUTH_REQUEST_TOKEN_URI = "/oauth/request_token";
+    private final String OAUTH_ACCESS_TOKEN_URI = "/oauth/access_token";
+    private final String OAUTH_AUTHORIZE_URI = "/dialog/authorize?";
+    private final String OAUTH_TEST_URI = "/api/test";    
+    
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -67,7 +73,6 @@ public class LoginActivity extends Activity {
         mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
         mEmailView = (EditText) findViewById(R.id.email);
         mEmailView.setText(mEmail);
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView
                 .setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -293,7 +298,7 @@ public class LoginActivity extends Activity {
 
         @Override
         protected String doInBackground(Void... params) {
-            String test = OAUTH.getRequestToken(mOAuthBaseUri + "/oauth/request_token");
+            String test = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI);
 
             return test;
         }
@@ -312,10 +317,10 @@ public class LoginActivity extends Activity {
                 return "";
             }
             
-            String test = OAUTH.getAccessToken(mOAuthBaseUri + "/oauth/access_token", params[0]);
-            
+            String test = OAUTH.getAccessToken(OAUTH_BASE_URI + OAUTH_ACCESS_TOKEN_URI, params[0]);
+
             // Test for getting a protected resource after succesful authentication
-            Log.v(TAG, "Got protected resource: " + OAUTH.getProtectedResource(mOAuthBaseUri + "/api/test", null));
+            Log.v(TAG, "Got protected resource: " + OAUTH.getProtectedResource(OAUTH_BASE_URI + OAUTH_TEST_URI, null));
             
             return test;
         }
@@ -332,10 +337,8 @@ public class LoginActivity extends Activity {
         if (requestCode == VERIFIER_REQUEST_ID) {
             if (resultCode == RESULT_OK) {
                 String verifier = data.getStringExtra("oauth_verifier");
-                String token = data.getStringExtra("oauth_token");
                 Log.v(TAG, "Verifier got here: " + verifier);
-                Log.v(TAG, "Token got here: " + token);
-                new OAuthAccessTokenTask().execute(verifier, token);
+                new OAuthAccessTokenTask().execute(verifier);
             }
         }
     }
@@ -352,7 +355,7 @@ public class LoginActivity extends Activity {
         }
 
         if (splitResult != null && splitResult.length > 1) {
-            String uriAuthorize = mOAuthBaseUri + "/dialog/authorize?" + splitResult[0];
+            String uriAuthorize = OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI + splitResult[0];
 
             Log.v(TAG, "uri: " + uriAuthorize);
 

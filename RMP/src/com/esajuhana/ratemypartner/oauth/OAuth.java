@@ -64,8 +64,7 @@ public class OAuth {
         mConsumerKey = consumerKey;
         mConsumerSecret = consumerSecret;
     }
-    
-    
+
     /**
      * Gets the state of OAuth-authentication
      * @return
@@ -136,9 +135,11 @@ public class OAuth {
      */
     public String getAccessToken(String accessTokenUrl, String verifier) {
         
-        if (mState != OAuthState.GotRequestToken){
-              throw new IllegalStateException("Request token hasn't been retrieved.");
-        } 
+        if (mState == OAuthState.Init) {
+            throw new IllegalStateException("Request token hasn't been retrieved.");
+        } else if (mState == OAuthState.GotAccessToken) {
+            throw new IllegalStateException("Access token has already been retrieved.");
+        }
 
         String timestamp = String.valueOf(getTimestamp());
         String nonce = String.valueOf(getNonce());
@@ -175,6 +176,27 @@ public class OAuth {
         }
         
         return result;
+    }
+
+    /**
+     * Gets the authorize get-request URI in OAuth 1.0 form.
+     * This URI can be used in outer web browser to authenticate with the
+     * service provider.
+     * 
+     * @return URI as a string with query parameters
+     */
+    public String getAuthorizeRequestUri(String url) {
+
+        if (mState == OAuthState.Init) {
+            throw new IllegalStateException("Request token hasn't been retrieved.");
+        } else if (mState == OAuthState.GotAccessToken) {
+            throw new IllegalStateException("Access token has already been retrieved.");
+        }
+
+        TreeMap<String, String> params = new TreeMap<String, String>();
+        params.put("oauth_token", mToken);
+
+        return url + getGetQueryParameters(params);
     }
 
     /**
@@ -215,6 +237,18 @@ public class OAuth {
         
         return result;
     }   
+    
+    /**
+     * Reset this object's state.
+     * Sets received token and token secret to empty.
+     * Sets internal state to "Init" (no request or access tokens received)
+     */
+    public void resetState() {
+        
+        mToken = "";
+        mTokenSecret = "";
+        mState = OAuthState.Init;
+    }
     
     private static long getNonce() {
         return getTimestamp() + sRandom.nextInt();

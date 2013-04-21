@@ -9,7 +9,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 /**
- *
+ * Activity which displays the webpage from the URL given as an intent
+ * String-parameter. Finishes when WebView gets to a page, which has a
+ * query parameter "oauth_verifier". Puts this verifier to an intent and sets
+ * it as a result and finishes.
+ * 
  * @author TODO
  */
 public class LoginOAuthActivity extends Activity {
@@ -18,6 +22,7 @@ public class LoginOAuthActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_oauth);
 
@@ -26,8 +31,10 @@ public class LoginOAuthActivity extends Activity {
 
         WebView webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient() {
+            
             @Override
             public void onPageFinished(WebView view, String url) {
+                
                 if (url.contains("oauth_verifier=")) {
                     Log.v(TAG, "onPageFinished found URL: " + url);
 
@@ -48,6 +55,7 @@ public class LoginOAuthActivity extends Activity {
                 super.onPageFinished(view, url);
             }
         });
+        
         webView.loadUrl(uri);
     }
 }

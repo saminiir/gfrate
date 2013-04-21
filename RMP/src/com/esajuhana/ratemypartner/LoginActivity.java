@@ -35,7 +35,7 @@ public class LoginActivity extends Activity {
     private final String OAUTH_BASE_URI = "http://10.0.2.2:5000";
     private final String OAUTH_REQUEST_TOKEN_URI = "/oauth/request_token";
     private final String OAUTH_ACCESS_TOKEN_URI = "/oauth/access_token";
-    private final String OAUTH_AUTHORIZE_URI = "/dialog/authorize?";
+    private final String OAUTH_AUTHORIZE_URI = "/dialog/authorize";
     private final String OAUTH_TEST_URI = "/api/test";    
     
     /**
@@ -346,16 +346,8 @@ public class LoginActivity extends Activity {
     private void OAuthCallbackLogin(String result) {
         Log.v(TAG, "OAuthCallbackLogin called!");
 
-        String[] splitResult = null;
-
         if (!TextUtils.isEmpty(result)) {
-            splitResult = result.split("&");
-
-            Log.v(TAG, "OAuthCallbackLogin - string is ok and split to " + splitResult.length + " parts");
-        }
-
-        if (splitResult != null && splitResult.length > 1) {
-            String uriAuthorize = OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI + splitResult[0];
+            String uriAuthorize = OAUTH.getAuthorizeRequestUri(OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI);
 
             Log.v(TAG, "uri: " + uriAuthorize);
 

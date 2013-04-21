@@ -48,12 +48,12 @@ public class OAuth {
 
         Init, GotRequestToken, GotAccessToken
     }
-    
-    private static enum HttpRequestType {
+
+    public static enum HttpRequestType {
 
         POST, GET
     }
-    
+
     /**
      * Initializes new OAuth-object.
      *
@@ -67,10 +67,11 @@ public class OAuth {
 
     /**
      * Gets the state of OAuth-authentication
+     *
      * @return
      */
     public OAuthState getState() {
-            return mState;
+        return mState;
     }
 
     /**
@@ -81,25 +82,16 @@ public class OAuth {
      * @return result body that the server returned
      */
     public String getRequestToken(String requestTokenUrl) {
-        
+
         // Return token, secret and state to initial values
         mToken = "";
         mTokenSecret = "";
         mState = OAuthState.Init;
-        
-        String timestamp = String.valueOf(getTimestamp());
-        String nonce = String.valueOf(getNonce());
 
-        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
-
+        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
         headerTreeMap.put("oauth_callback", "oob");
-        headerTreeMap.put("oauth_consumer_key", mConsumerKey);
-        headerTreeMap.put("oauth_signature_method", mOauthSignatureMethod);
-        headerTreeMap.put("oauth_timestamp", timestamp);
-        headerTreeMap.put("oauth_version", mOauthVersion);
-        headerTreeMap.put("oauth_nonce", nonce);
 
-        String signature = getSignature(headerTreeMap, requestTokenUrl, HttpRequestType.POST);
+        String signature = getSignature(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
 
         String result = getHttpResult(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
@@ -112,9 +104,9 @@ public class OAuth {
             if (secret != null && token != null) {
                 mTokenSecret = secret;
                 mToken = token;
-                
+
                 mState = OAuthState.GotRequestToken;
-                
+
                 Log.v(TAG, "Got tokenSecret = " + mTokenSecret);
                 Log.v(TAG, "Got token = " + mToken);
             }
@@ -125,8 +117,8 @@ public class OAuth {
 
     /**
      * Gets OAuth 1.0 access token from the URL given as a parameter. Uses
-     * HTTP-POST.
-     * Throws IllegalStateException if user hasn't got a request token.
+     * HTTP-POST. Throws IllegalStateException if user hasn't got a request
+     * token.
      *
      * @param accessTokenUrl
      * @param verifier
@@ -134,31 +126,23 @@ public class OAuth {
      * @return http body
      */
     public String getAccessToken(String accessTokenUrl, String verifier) {
-        
+
         if (mState == OAuthState.Init) {
             throw new IllegalStateException("Request token hasn't been retrieved.");
         } else if (mState == OAuthState.GotAccessToken) {
             throw new IllegalStateException("Access token has already been retrieved.");
         }
 
-        String timestamp = String.valueOf(getTimestamp());
-        String nonce = String.valueOf(getNonce());
+        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
 
-        TreeMap<String, String> headerTreeMap = new TreeMap<String, String>();
-
-        headerTreeMap.put("oauth_consumer_key", mConsumerKey);
-        headerTreeMap.put("oauth_nonce", nonce);
-        headerTreeMap.put("oauth_signature_method", mOauthSignatureMethod);
-        headerTreeMap.put("oauth_timestamp", timestamp);
         headerTreeMap.put("oauth_token", mToken);
         headerTreeMap.put("oauth_verifier", verifier);
-        headerTreeMap.put("oauth_version", mOauthVersion);
 
-        String signature = getSignature(headerTreeMap, accessTokenUrl, HttpRequestType.POST);
+        String signature = getSignature(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
-        
+
         String result = getHttpResult(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
-        
+
         if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
             String secret = uri.getQueryParameter("oauth_token_secret");
@@ -167,22 +151,21 @@ public class OAuth {
             if (secret != null && token != null) {
                 mTokenSecret = secret;
                 mToken = token;
-                
+
                 mState = OAuthState.GotAccessToken;
-                
+
                 Log.v(TAG, "Got accesstokenSecret  = " + mTokenSecret);
                 Log.v(TAG, "Got accesstoken = " + mToken);
             }
         }
-        
+
         return result;
     }
 
     /**
-     * Gets the authorize get-request URI in OAuth 1.0 form.
-     * This URI can be used in outer web browser to authenticate with the
-     * service provider.
-     * 
+     * Gets the authorize get-request URI in OAuth 1.0 form. This URI can be
+     * used in outer web browser to authenticate with the service provider.
+     *
      * @return URI as a string with query parameters
      */
     public String getAuthorizeRequestUri(String url) {
@@ -200,56 +183,63 @@ public class OAuth {
     }
 
     /**
-     * Gets protected resource from the URL given as a parameter.
-     * GET-query parameters can be specified with params-parameter.
-     * Uses HTTP GET. Throws IllegalStateException if user has not authenticated.
-     * 
-     * @param resourceUrl URL to fetch protected resource
-     * @param params HTTP GET query parameters
+     * Accesses protected resource from the URL given as a parameter. GET/POST
+     * parameters can be specified with params-parameter. Throws
+     * IllegalStateException if user has not authenticated.
+     *
+     * @param resourceUrl URL to access protected resource
+     * @param params HTTP GET/POST parameters
+     * @param requesttype HTTP request type as enum
      * @return HTTP response as a string
      */
-    public String getProtectedResource(String resourceUrl, Map<String, String> params) {
-        
-        if (mState != OAuthState.GotAccessToken){
+    public String accessProtectedResource(String resourceUrl, Map<String, String> params, HttpRequestType reguestType) {
+
+        if (mState != OAuthState.GotAccessToken) {
             throw new IllegalStateException("Access token hasn't been retrieved.");
         }
-        
-        String timestamp = String.valueOf(getTimestamp());
-        String nonce = String.valueOf(getNonce());
 
-        TreeMap<String, String> paramsTreeMap = new TreeMap<String, String>();
-
-        paramsTreeMap.put("oauth_consumer_key", mConsumerKey);
-        paramsTreeMap.put("oauth_nonce", nonce);
-        paramsTreeMap.put("oauth_signature_method", mOauthSignatureMethod);
-        paramsTreeMap.put("oauth_timestamp", timestamp);
+        TreeMap<String, String> paramsTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
         paramsTreeMap.put("oauth_token", mToken);
-        paramsTreeMap.put("oauth_version", mOauthVersion);
-        
+
         if (params != null) {
             paramsTreeMap.putAll(params);
         }
 
-        String signature = getSignature(paramsTreeMap, resourceUrl, HttpRequestType.GET);
+        String signature = getSignature(resourceUrl, paramsTreeMap, reguestType);
         paramsTreeMap.put("oauth_signature", signature);
-        
-        String result = getHttpResult(resourceUrl, paramsTreeMap, HttpRequestType.GET);
-        
+
+        String result = getHttpResult(resourceUrl, paramsTreeMap, reguestType);
+
         return result;
-    }   
-    
+    }
+
     /**
-     * Reset this object's state.
-     * Sets received token and token secret to empty.
+     * Reset this object's state. Sets received token and token secret to empty.
      * Sets internal state to "Init" (no request or access tokens received)
      */
     public void resetState() {
-        
+
         mToken = "";
         mTokenSecret = "";
         mState = OAuthState.Init;
     }
-    
+
+    private Map<String, String> getAlwaysUsedParams() {
+
+        String timestamp = String.valueOf(getTimestamp());
+        String nonce = String.valueOf(getNonce());
+
+        Map<String, String> params = new TreeMap<String, String>();
+
+        params.put("oauth_consumer_key", mConsumerKey);
+        params.put("oauth_nonce", nonce);
+        params.put("oauth_signature_method", mOauthSignatureMethod);
+        params.put("oauth_timestamp", timestamp);
+        params.put("oauth_version", mOauthVersion);
+
+        return params;
+    }
+
     private static long getNonce() {
         return getTimestamp() + sRandom.nextInt();
     }
@@ -290,9 +280,8 @@ public class OAuth {
         } catch (IllegalStateException e) {
             Log.v(TAG, e.getMessage());
         }
-        
-        if (!TextUtils.isEmpty(result))
-        {
+
+        if (!TextUtils.isEmpty(result)) {
             Log.v(TAG, "HTTP-result body was: " + result);
         } else {
             Log.v(TAG, "HTTP-result body was empty");
@@ -301,7 +290,7 @@ public class OAuth {
         return result;
     }
 
-    private String getSignature(TreeMap<String, String> headerTreeMap, String url, HttpRequestType requestType) {
+    private String getSignature(String url, TreeMap<String, String> headerTreeMap, HttpRequestType requestType) {
 
         boolean firstKey = true;
         StringBuilder normalizedParameters = new StringBuilder();
@@ -393,8 +382,7 @@ public class OAuth {
 
         return result;
     }
-    
-    
+
     private static String getUrlEncoded(String toEncode) {
         try {
             toEncode = URLEncoder.encode(toEncode, "UTF-8");

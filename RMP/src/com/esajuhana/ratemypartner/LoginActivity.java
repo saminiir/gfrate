@@ -22,22 +22,18 @@ import com.esajuhana.ratemypartner.oauth.OAuth;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
- * well.
- * TODO: Refactor (strange mix of OAuth and original login-view)
+ * well. TODO: Refactor (strange mix of OAuth and original login-view)
  */
 public class LoginActivity extends Activity {
 
     private static final String TAG = "LoginActivity";
     private static final int VERIFIER_REQUEST_ID = 1;
-    
     private final OAuth OAUTH = new OAuth("abc123", "ssh-secret");
-    
     private final String OAUTH_BASE_URI = "http://10.0.2.2:5000";
     private final String OAUTH_REQUEST_TOKEN_URI = "/oauth/request_token";
     private final String OAUTH_ACCESS_TOKEN_URI = "/oauth/access_token";
     private final String OAUTH_AUTHORIZE_URI = "/dialog/authorize";
-    private final String OAUTH_TEST_URI = "/api/test";    
-    
+    private final String OAUTH_TEST_URI = "/api/test";
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -293,14 +289,21 @@ public class LoginActivity extends Activity {
             showProgress(false);
         }
     }
-    
+
     private class OAuthRequestTokenTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... params) {
-            String test = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI);
+            String requestToken = "";
 
-            return test;
+            try {
+                requestToken = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI);
+            } catch (IllegalStateException ex) {
+                Log.v(TAG, "Wrong state: " + ex);
+                OAUTH.resetState();
+            }
+
+            return requestToken;
         }
 
         @Override
@@ -308,7 +311,30 @@ public class LoginActivity extends Activity {
             OAuthCallbackLogin(result);
         }
     }
-    
+
+    private void OAuthCallbackLogin(String result) {
+        Log.v(TAG, "OAuthCallbackLogin called!");
+
+        if (!TextUtils.isEmpty(result)) {
+            String uriAuthorize = "";
+
+            try {
+                uriAuthorize = OAUTH.getAuthorizeRequestUri(OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI);
+            } catch (IllegalStateException ex) {
+                Log.v(TAG, "Wrong state: " + ex);
+                OAUTH.resetState();
+                return;
+            }
+
+            Log.v(TAG, "uri: " + uriAuthorize);
+
+            Intent intent = new Intent(this, LoginOAuthActivity.class);
+            intent.putExtra("uri", uriAuthorize);
+
+            startActivityForResult(intent, VERIFIER_REQUEST_ID);
+        }
+    }
+
     private class OAuthAccessTokenTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -316,13 +342,20 @@ public class LoginActivity extends Activity {
             if (params.length < 1) {
                 return "";
             }
-            
-            String test = OAUTH.getAccessToken(OAUTH_BASE_URI + OAUTH_ACCESS_TOKEN_URI, params[0]);
 
-            // Test for getting a protected resource after succesful authentication
-            Log.v(TAG, "Got protected resource: " + OAUTH.getProtectedResource(OAUTH_BASE_URI + OAUTH_TEST_URI, null));
-            
-            return test;
+            String accessToken = "";
+
+            try {
+                accessToken = OAUTH.getAccessToken(OAUTH_BASE_URI + OAUTH_ACCESS_TOKEN_URI, params[0]);
+
+                // Test for getting a protected resource after succesful authentication
+                Log.v(TAG, "Got protected resource: " + OAUTH.accessProtectedResource(OAUTH_BASE_URI + OAUTH_TEST_URI, null, OAuth.HttpRequestType.GET));
+            } catch (IllegalStateException ex) {
+                Log.v(TAG, "Wrong state: " + ex);
+                OAUTH.resetState();
+            }
+
+            return accessToken;
         }
 
         @Override
@@ -330,7 +363,7 @@ public class LoginActivity extends Activity {
             Log.v(TAG, "Got access token: " + result);
         }
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
             Intent data) {
@@ -342,20 +375,4 @@ public class LoginActivity extends Activity {
             }
         }
     }
-    
-    private void OAuthCallbackLogin(String result) {
-        Log.v(TAG, "OAuthCallbackLogin called!");
-
-        if (!TextUtils.isEmpty(result)) {
-            String uriAuthorize = OAUTH.getAuthorizeRequestUri(OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI);
-
-            Log.v(TAG, "uri: " + uriAuthorize);
-
-            Intent intent = new Intent(this, LoginOAuthActivity.class);
-            intent.putExtra("uri", uriAuthorize);
-
-            startActivityForResult(intent, VERIFIER_REQUEST_ID);
-        }
-    }
-    
 }

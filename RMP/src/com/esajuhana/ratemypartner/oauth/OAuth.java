@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Key;
@@ -24,11 +25,12 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
 
 /**
- * OAuth request handler
+ * OAuth request handler.
+ * Implements Serializable-interface.
  *
  * @author TODO
  */
-public class OAuth {
+public class OAuth implements Serializable {
 
     private final static String TAG = "OAuth";
     private final int TIMEOUT = 10000;

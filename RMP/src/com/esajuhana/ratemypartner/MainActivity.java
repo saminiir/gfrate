@@ -2,17 +2,24 @@ package com.esajuhana.ratemypartner;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import com.esajuhana.ratemypartner.oauth.OAuth;
 
 public class MainActivity extends Activity {
-    private final String TAG = "MainActivity";
 
+    private final String TAG = "MainActivity";
+    private OAuth OAUTH = null;
+    // TODO: base url and endpoint url constants
+    // TODO: from settings on activity creation?
+    
     public static boolean loggedIn = false;
     private int currentAdjustment = 0;
 
@@ -54,20 +61,50 @@ public class MainActivity extends Activity {
     }
 
     public void sendAdjustments(View view) {
-        //TODO: HTTP requests
+        new TestAccessTask().execute(currentAdjustment);    
     }
+    
+    private class TestAccessTask extends AsyncTask<Integer, Void, String> {
 
+        @Override
+        protected String doInBackground(Integer... params) {
+            if (params.length == 0) {
+                return "Params are missing!";
+            }
+            
+            String result = "";
+
+            try {
+                // params etc.
+                result = OAUTH.accessProtectedResource("http://secure-falls-3392.herokuapp.com/api/test", null, OAuth.HttpRequestType.GET);
+            } catch (IllegalStateException ex) {
+                Log.v(TAG, "Wrong state: " + ex.getMessage());
+                OAUTH.resetState();
+                // TODO: Show message
+                // TODO: callback with finish() (back to login)
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+        Log.v(TAG, "Got response: " + result);
+        }
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!loggedIn) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            //EditText editText = (EditText) findViewById(R.id.edit_message);
-            //String message = editText.getText().toString();
-            //intent.putExtra(EXTRA_MESSAGE, message);
-            startActivity(intent);
+        Intent intent = getIntent();
+        OAUTH = (OAuth) intent.getSerializableExtra("oauth_object");
+
+        if (OAUTH == null) {
+            finish();
+        } else {
+            Log.v(TAG, "Got OAuth object with state: " + OAUTH.getState().toString());
         }
     }
 

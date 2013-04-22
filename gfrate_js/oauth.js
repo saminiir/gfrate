@@ -174,14 +174,13 @@ exports.userAuthorization = [
 // issuing the permanent access token.
 
 exports.userDecision = [
-  login.ensureLoggedIn(),
-  server.userDecision(function(requestToken, user, res, done) {
-    var verifier = utils.uid(8);
-    db.requestTokens.approve(requestToken, user.id, verifier, function(err) {
-      if (err) { return done(err); }
-      return done(null, verifier);
-    });
-  })
+   server.userDecision(function(requestToken, user, res, done) {
+       var verifier = utils.uid(8);
+       db.requestTokens.approve(requestToken, user.id, verifier, function(err) {
+           if (err) { return done(err); }
+           return done(null, verifier);
+       });
+   })
 ]
 
 // user decision endpoint #2

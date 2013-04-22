@@ -42,4 +42,8 @@ env
 node_modules
 *_bak*
 *.swo
-*.orig
+
+# Local Android-settings
+local.properties
+gen
+bin

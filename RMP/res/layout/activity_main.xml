@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity" >
+    
+   <LinearLayout
+        android:id="@+id/main_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/partner_score"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/partner_score"
+            android:textSize="160sp" />
+
+        <TextView
+            android:id="@+id/partner_description"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/partner_description"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/partner_rank"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="@string/partner_rank"
+            android:textSize="12sp" />
+        
+		<Button
+		    android:id="@+id/send_adjustments"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:onClick="sendAdjustments"
+		    android:text="@string/send_adjustments" />
+        
+		<LinearLayout 
+		    android:id="@+id/adjustment_buttons" 
+		    android:layout_height="wrap_content" 
+		    android:layout_width="fill_parent"
+		    android:orientation="horizontal">
+
+			<Button
+			    android:id="@+id/increase_value"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:onClick="increaseValue"
+			    android:padding="10dp"
+			    android:text="@string/increase_value" />
+
+			<Button
+			    android:id="@+id/decrease_value"
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"
+			    android:onClick="decreaseValue"
+			    android:padding="10dp"
+			    android:text="@string/decrease_value" />
+
+		</LinearLayout>
+		
+    </LinearLayout>
+    
+</RelativeLayout>

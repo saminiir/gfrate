@@ -5,7 +5,8 @@ var oauthorize = require('oauthorize')
   , passport = require('passport')
   , login = require('connect-ensure-login')
   , db = require('./db')
-  , utils = require('./utils');
+  , utils = require('./utils')
+  , qs = require('querystring');;
 
 
 // create OAuth server
@@ -104,10 +105,10 @@ exports.accessToken = [
     function(client, requestToken, info, done) {
       if (!info.approved) { return done(null, false); }
       if (client.id !== info.clientID) { return done(null, false); }
-      
+
       var token = utils.uid(16)
         , secret = utils.uid(64)
-  
+
       db.accessTokens.save(token, secret, info.userID, info.clientID, function(err) {
         if (err) { return done(err); }
         return done(null, token, secret);
@@ -140,7 +141,7 @@ exports.accessToken = [
 // the application's responsibility to authenticate the user and render a dialog
 // to obtain their approval (displaying details about the client requesting
 // authorization).  We accomplish that here by routing through `ensureLoggedIn()`
-// first, and rendering the `dialog` view. 
+// first, and rendering the `dialog` view.
 
 exports.userAuthorization = [
   login.ensureLoggedIn(),
@@ -180,4 +181,38 @@ exports.userDecision = [
            return done(null, verifier);
        });
    })
+]
+
+// user decision endpoint #2
+exports.userDecisionReturn = [
+      login.ensureLoggedIn(),
+      function(req, res, params) {
+                    if (!req.oauth.res.allow)
+                    {
+                      req.logout();
+                      // Maybe actual "denied" page..
+                      return res.redirect('/');
+                    }
+
+                    // v1.0 oauth_token + oauth_verifier (well, consumer already knows the token...)
+                    /*
+                    params = params || {};
+                    params['oauth_token'] = req.oauth.authz.token;
+                    params['oauth_verifier'] = req.oauth.verifier;
+                    var fue = Object.keys(params).map(function(key) {
+                      return utils.encode(key) + '=' + utils.encode(params[key]);
+                    }).join('&');
+
+                    res.setHeader('Content-Type', 'x-www-form-urlencoded');
+                    res.setHeader('Cache-Control', 'no-store');
+                    res.setHeader('Pragma', 'no-cache');
+                    res.end(fue);
+                    */
+
+                    //redirect to GET
+                    //TODO: Redirect to callback?
+                    var getParams = qs.stringify({ oauth_token: req.oauth.authz.token, oauth_verifier: req.oauth.verifier });
+                    res.redirect('/dialog/authorize/decision?' + getParams);
+
+      }
 ]

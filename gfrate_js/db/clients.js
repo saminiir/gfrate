@@ -1,5 +1,5 @@
 var clients = [
-    { id: '1', name: 'Samplr', consumerKey: 'abc123', consumerSecret: 'ssh-secret' }
+    { id: '1', name: 'RateMyPartner-client', consumerKey: 'abc123', consumerSecret: 'ssh-secret' }
 ];
 
 

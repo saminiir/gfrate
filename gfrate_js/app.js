@@ -2,7 +2,8 @@ var express = require('express')
   , passport = require('passport')
   , routes = require('./routes')
   , oauth = require('./oauth')
-  , path = require('path');
+  , path = require('path')
+  , test = require('./test');
 
 var app = express();
 app.configure(function(){
@@ -20,7 +21,7 @@ app.configure(function(){
 });
 
 app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
 require('./auth');
@@ -32,13 +33,17 @@ app.get('/logout', routes.logout);
 
 app.get('/dialog/authorize', oauth.userAuthorization);
 app.post('/dialog/authorize/decision', oauth.userDecision);
+app.post('/dialog/authorize/decision', oauth.userDecisionReturn);
+app.get('/dialog/authorize/decision', routes.verified);
 
 app.post('/oauth/request_token', oauth.requestToken);
 app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
 
-var port = process.env.PORT || 5001;
+app.get('/api/test', test.info);
+
+var port = process.env.PORT || 5000;
 app.listen(port, function() {
   console.log("Listening on " + port);
 });

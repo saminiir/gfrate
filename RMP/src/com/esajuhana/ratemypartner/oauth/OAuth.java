@@ -20,13 +20,15 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 /**
- * OAuth request handler.
- * Implements Serializable-interface.
+ * OAuth request handler. Implements Serializable-interface.
  *
  * @author TODO
  */
@@ -93,7 +95,7 @@ public class OAuth implements Serializable {
         mState = OAuthState.Init;
 
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
-        
+
         if (TextUtils.isEmpty(callbackUrl)) {
             headerTreeMap.put("oauth_callback", "oob");
         } else {
@@ -103,7 +105,7 @@ public class OAuth implements Serializable {
         String signature = getSignature(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
 
-        String result = getHttpResult(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
+        String result = getHttpResult(requestTokenUrl, headerTreeMap, null, HttpRequestType.POST);
 
         if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
@@ -150,7 +152,7 @@ public class OAuth implements Serializable {
         String signature = getSignature(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
 
-        String result = getHttpResult(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
+        String result = getHttpResult(accessTokenUrl, headerTreeMap, null, HttpRequestType.POST);
 
         if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
@@ -198,10 +200,10 @@ public class OAuth implements Serializable {
      *
      * @param resourceUrl URL to access protected resource
      * @param params HTTP GET/POST parameters
-     * @param requesttype HTTP request type as enum
+     * @param requestType HTTP request type as enum
      * @return HTTP response as a string
      */
-    public String accessProtectedResource(String resourceUrl, Map<String, String> params, HttpRequestType reguestType) {
+    public String accessProtectedResource(String resourceUrl, Map<String, String> params, String body, HttpRequestType requestType) {
 
         if (mState != OAuthState.GotAccessToken) {
             throw new IllegalStateException("Access token hasn't been retrieved.");
@@ -214,10 +216,10 @@ public class OAuth implements Serializable {
             paramsTreeMap.putAll(params);
         }
 
-        String signature = getSignature(resourceUrl, paramsTreeMap, reguestType);
+        String signature = getSignature(resourceUrl, paramsTreeMap, requestType);
         paramsTreeMap.put("oauth_signature", signature);
 
-        String result = getHttpResult(resourceUrl, paramsTreeMap, reguestType);
+        String result = getHttpResult(resourceUrl, paramsTreeMap, body, requestType);
 
         return result;
     }
@@ -257,7 +259,7 @@ public class OAuth implements Serializable {
         return System.currentTimeMillis() / 1000;
     }
 
-    private String getHttpResult(String url, TreeMap<String, String> params, HttpRequestType requestType) throws ParseException {
+    private String getHttpResult(String url, TreeMap<String, String> params, String body, HttpRequestType requestType) throws ParseException {
         String result = "";
 
         try {
@@ -271,6 +273,18 @@ public class OAuth implements Serializable {
                 Log.v(TAG, "Authorization header: " + headerContent);
 
                 httpPost.setHeader("Authorization", headerContent);
+
+                // TODO: refactor... little bit too much going on here
+                if (body != null) {
+                    httpPost.setHeader("Accept", "application/json");
+                    httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
+
+                    StringEntity se = new StringEntity(body);
+                    se.setContentType("text/xml");
+                    se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json; charset=utf-8"));
+                    httpPost.setEntity(se);
+                }
+
                 HttpResponse response = httpClient.execute(httpPost);
                 result = EntityUtils.toString(response.getEntity());
             } else {

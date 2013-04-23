@@ -14,44 +14,56 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import com.esajuhana.ratemypartner.oauth.OAuth;
 
 /**
- * Activity which displays a login screen to the user.
- * TODO: messages, exceptions, errors, login animation etc.
+ * Activity which displays a login screen to the user. TODO: messages,
+ * exceptions, errors, login animation etc.
  */
 public class LoginActivity extends Activity {
 
     // TODO: url constants from settings on create?
     private static final String TAG = "LoginActivity";
-    
     private static final int VERIFIER_REQUEST_ID = 1;
-    
-    private final OAuth OAUTH = new OAuth("abc123", "ssh-secret");
-    private final String OAUTH_BASE_URI = "http://secure-falls-3392.herokuapp.com";
-    private final String OAUTH_REQUEST_TOKEN_URI = "/oauth/request_token";
-    private final String OAUTH_ACCESS_TOKEN_URI = "/oauth/access_token";
-    private final String OAUTH_AUTHORIZE_URI = "/dialog/authorize";
-    private final String OAUTH_TEST_URI = "/api/test";
-    
+    private OAuth OAUTH;
+    private String OAUTH_BASE_URI;
+    private String OAUTH_REQUEST_TOKEN_URI;
+    private String OAUTH_ACCESS_TOKEN_URI;
+    private String OAUTH_AUTHORIZE_URI;
     private View mLoginFormView;
     private View mLoginStatusView;
+    private TextView mLoginStatusMessageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String consumerKey = getResources().getString(R.string.oauth_consumer_key);
+        String consumerSecret = getResources().getString(R.string.oauth_consumer_secret);
+
+        OAUTH = new OAuth(consumerKey, consumerSecret);
+        OAUTH_BASE_URI = getResources().getString(R.string.oauth_uri_base);
+        OAUTH_REQUEST_TOKEN_URI = getResources().getString(R.string.oauth_uri_request_token);
+        OAUTH_ACCESS_TOKEN_URI = getResources().getString(R.string.oauth_uri_access_token);
+        OAUTH_AUTHORIZE_URI = getResources().getString(R.string.oauth_uri_authorize);
+
         setContentView(R.layout.activity_login);
         setupActionBar();
+        
+        mLoginFormView = findViewById(R.id.login_form);
+        mLoginStatusView = findViewById(R.id.login_status);
+        mLoginStatusMessageView = (TextView) findViewById(R.id.login_status_message);
+        mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 
         findViewById(R.id.login_oauth_button).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        showProgress(true);
                         new OAuthRequestTokenTask().execute();
                     }
                 });
-
     }
 
     /**
@@ -91,12 +103,6 @@ public class LoginActivity extends Activity {
         return true;
     }
 
-    /*
-     mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
-     showProgress(true);
-     mAuthTask = new UserLoginTask();
-     mAuthTask.execute((Void) null);
-     */
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -185,6 +191,12 @@ public class LoginActivity extends Activity {
         protected void onPostExecute(String result) {
             OAuthCallbackLogin(result);
         }
+
+        @Override
+        protected void onCancelled() {
+            OAUTH.resetState();
+            showProgress(false);
+        }
     }
 
     private void OAuthCallbackLogin(String result) {
@@ -237,10 +249,17 @@ public class LoginActivity extends Activity {
             Log.v(TAG, "Got access token: " + result);
             OAuthCallbackAuthorized();
         }
+
+        @Override
+        protected void onCancelled() {
+            OAUTH.resetState();
+            showProgress(false);
+        }
     }
 
     protected void OAuthCallbackAuthorized() {
         if (OAUTH.getState() == OAuth.OAuthState.GotAccessToken) {
+            showProgress(false);
             Intent oAuthIntent = new Intent(this, MainActivity.class);
             oAuthIntent.putExtra("oauth_object", OAUTH);
             startActivity(oAuthIntent);

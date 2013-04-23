@@ -29,7 +29,7 @@ public class LoginOAuthActivity extends Activity {
         Intent intent = getIntent();
         String uri = intent.getStringExtra("uri");
 
-        WebView webView = (WebView) findViewById(R.id.webview);
+        final WebView webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient() {
             
             @Override

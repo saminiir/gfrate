@@ -11,6 +11,7 @@ D:\Koodaus\gfrate\RMP\res\menu\main.xml \
 D:\Koodaus\gfrate\RMP\res\values\dimens.xml \
 D:\Koodaus\gfrate\RMP\res\values\strings.xml \
 D:\Koodaus\gfrate\RMP\res\values\strings_activity_login.xml \
+D:\Koodaus\gfrate\RMP\res\values\strings_settings.xml \
 D:\Koodaus\gfrate\RMP\res\values\styles.xml \
 D:\Koodaus\gfrate\RMP\res\values-large\styles.xml \
 D:\Koodaus\gfrate\RMP\res\values-sw600dp\dimens.xml \

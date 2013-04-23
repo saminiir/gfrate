@@ -1,6 +1,8 @@
 package com.esajuhana.ratemypartner;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,17 +13,48 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.TextView;
+import com.esajuhana.ratemypartner.helpers.JSONParser;
 import com.esajuhana.ratemypartner.oauth.OAuth;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
     private final String TAG = "MainActivity";
+    protected final Context context = this;
     private OAuth OAUTH = null;
-    // TODO: base url and endpoint url constants
-    // TODO: from settings on activity creation?
-    
+    private String OAUTH_BASE_URI;
+    private String OAUTH_TEST_URI;
     public static boolean loggedIn = false;
     private int currentAdjustment = 0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        OAUTH_BASE_URI = getResources().getString(R.string.oauth_uri_base);
+        OAUTH_TEST_URI = getResources().getString(R.string.oauth_uri_test_post);
+
+        Intent intent = getIntent();
+        OAUTH = (OAuth) intent.getSerializableExtra("oauth_object");
+
+        if (OAUTH == null) {
+            finish();
+        } else {
+            Log.v(TAG, "Got OAuth object with state: " + OAUTH.getState().toString());
+        }
+        
+        new TestAccessTask2().execute();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
     public void animateButton(int buttonResourceName) {
         final Animation animation = new AlphaAnimation(1, 0); // Change alpha from fully visible to invisible
@@ -46,7 +79,7 @@ public class MainActivity extends Activity {
         animateButton(R.id.send_adjustments);
         Button sendAdjustment = (Button) findViewById(R.id.send_adjustments);
         if (currentAdjustment == 0) {
-            sendAdjustment.setText(R.id.send_adjustments);
+            sendAdjustment.setText(getResources().getString(R.string.send_adjustments));
         } else {
             sendAdjustment.setText("Tap here to compensate rating by (" + currentAdjustment + ")");
         }
@@ -61,9 +94,9 @@ public class MainActivity extends Activity {
     }
 
     public void sendAdjustments(View view) {
-        new TestAccessTask().execute(currentAdjustment);    
+        new TestAccessTask().execute(currentAdjustment);
     }
-    
+
     private class TestAccessTask extends AsyncTask<Integer, Void, String> {
 
         @Override
@@ -71,12 +104,23 @@ public class MainActivity extends Activity {
             if (params.length == 0) {
                 return "Params are missing!";
             }
-            
+
             String result = "";
 
             try {
                 // params etc.
-                result = OAUTH.accessProtectedResource("http://secure-falls-3392.herokuapp.com/api/test", null, OAuth.HttpRequestType.GET);
+                JSONObject jsonBody = new JSONObject();
+
+                try {
+                    jsonBody.put("to_add", params[0]);
+                } catch (JSONException ex) {
+                    Log.v(TAG, "Error in JSONObject.put: " + ex.getMessage());
+                }
+
+                result = OAUTH.accessProtectedResource(
+                        OAUTH_BASE_URI + OAUTH_TEST_URI, null,
+                        jsonBody.toString(), OAuth.HttpRequestType.POST);
+
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
                 OAUTH.resetState();
@@ -89,29 +133,98 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-        Log.v(TAG, "Got response: " + result);
+            Log.v(TAG, "Got response: " + result);
+
+            final JSONObject jsonResult = JSONParser.parse(result);
+
+            if (jsonResult == null) {
+                Log.e(TAG, "Error in JSONParser. Check error in that class.");
+                return;
+            }
+            
+            int points;
+            
+            try {
+                boolean isOK = jsonResult.getBoolean("test");
+                int added = jsonResult.getInt("added");
+                points = jsonResult.getInt("points");
+                Log.v(TAG, "JSON parsing result: " + String.valueOf(isOK) + ", " + added);
+            } catch (final JSONException ex) {
+                Log.e(TAG, "Error in JSON parsing: " + ex.getMessage());
+
+                updateDialog("Error", ex.getMessage());
+
+                return;
+            }
+
+            updateDialog("JSON-result", jsonResult.toString());
+            updateTextView(R.id.partner_score, points);
         }
     }
     
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    private class TestAccessTask2 extends AsyncTask<Void, Void, String> {
 
-        Intent intent = getIntent();
-        OAUTH = (OAuth) intent.getSerializableExtra("oauth_object");
+        @Override
+        protected String doInBackground(Void... params) {
+            String result = "";
 
-        if (OAUTH == null) {
-            finish();
-        } else {
-            Log.v(TAG, "Got OAuth object with state: " + OAUTH.getState().toString());
+            try {
+
+                result = OAUTH.accessProtectedResource(
+                        OAUTH_BASE_URI + "/api/test2", null,
+                        null, OAuth.HttpRequestType.GET);
+
+            } catch (IllegalStateException ex) {
+                Log.v(TAG, "Wrong state: " + ex.getMessage());
+                OAUTH.resetState();
+                // TODO: Show message
+                // TODO: callback with finish() (back to login)
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.v(TAG, "Got response: " + result);
+
+            final JSONObject jsonResult = JSONParser.parse(result);
+
+            if (jsonResult == null) {
+                Log.e(TAG, "Error in JSONParser. Check error in that class.");
+                return;
+            }
+            
+            int points;
+            
+            try {
+                points = jsonResult.getInt("points");
+                Log.v(TAG, "JSON parsing result: " + points);
+            } catch (final JSONException ex) {
+                Log.e(TAG, "Error in JSON parsing: " + ex.getMessage());
+
+                updateDialog("Error", ex.getMessage());
+
+                return;
+            }
+
+            updateDialog("JSON-result", jsonResult.toString());
+            updateTextView(R.id.partner_score, points);
         }
     }
+    
+    private void updateTextView(int id, int points) {
+            TextView scoreTextView = (TextView)findViewById(id);
+            scoreTextView.setText(String.valueOf(points));       
+    }
+    
+    private void updateDialog(String title, String content) {
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+
+        alertDialogBuilder.setTitle(title);
+        alertDialogBuilder.setMessage(content);
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 }

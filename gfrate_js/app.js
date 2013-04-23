@@ -41,7 +41,9 @@ app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
 
-app.get('/api/test', test.info);
+// add .json extension to the endpoints
+app.post('/api/test', test.info);
+app.get('/api/test2', test.getPoints);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

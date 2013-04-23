@@ -6,7 +6,7 @@ var oauthorize = require('oauthorize')
   , login = require('connect-ensure-login')
   , db = require('./db')
   , utils = require('./utils')
-  , qs = require('querystring');;
+  , qs = require('querystring');
 
 
 // create OAuth server

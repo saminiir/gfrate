@@ -1,0 +1,13 @@
+<resources>
+
+    <!-- TODO: ... -->
+    <string name="oauth_consumer_key">abc123</string>
+    <string name="oauth_consumer_secret">ssh-secret</string>
+        
+    <string name="oauth_uri_base">http://quiet-shore-5385.herokuapp.com</string>
+    <string name="oauth_uri_request_token">/oauth/request_token</string>
+    <string name="oauth_uri_access_token">/oauth/access_token</string>
+    <string name="oauth_uri_authorize">/dialog/authorize</string>
+    <string name="oauth_uri_test_post">/api/test</string>
+
+</resources>

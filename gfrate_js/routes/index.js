@@ -1,5 +1,6 @@
 var passport = require('passport')
 	, login = require('connect-ensure-login')
+  , url = require('url')
 /*
  * GET home page.
  */
@@ -21,7 +22,20 @@ exports.logout = function(req, res) {
   res.redirect('/');
 }
 
-exports.verified =[ login.ensureLoggedIn(), function(req, res){
-  res.render('verified', { title: 'Verified' });
+exports.verified =[
+  login.ensureLoggedIn(), function(req, res){
+  var url_parts = url.parse(req.url, true);
+  var query = url_parts.query;
+  console.log(query);
+  if ( typeof query.oauth_token !== 'undefined' && query.oauth_token !== null )
+  {
+     if ( typeof query.oauth_verifier !== 'undefined' && query.oauth_verifier !== null )
+     {
+        res.render('verified', { title: 'Verified', locals: { oauth_token: query.oauth_token, oauth_verifier: query.oauth_verifier}});
+     }
+  } else {
+     req.logout();
+     res.redirect('/');
+  }
 }
-  ]
+]

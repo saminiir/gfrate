@@ -1,5 +1,8 @@
 package com.esajuhana.ratemypartner;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -14,10 +17,9 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
+
 import com.esajuhana.ratemypartner.helpers.JSONParser;
 import com.esajuhana.ratemypartner.oauth.OAuth;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
@@ -66,6 +68,11 @@ public class MainActivity extends Activity {
         animation.setRepeatMode(Animation.REVERSE); // symmetric animation
         final Button btn = (Button) findViewById(buttonResourceName);
         btn.startAnimation(animation);
+    }
+    
+    public void hallOfFame(View view) {
+	    Intent intent = new Intent(this, HallOfFameActivity.class);
+	    startActivity(intent);
     }
 
     /**

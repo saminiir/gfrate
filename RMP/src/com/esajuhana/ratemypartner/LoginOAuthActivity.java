@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -13,6 +14,8 @@ import android.webkit.WebViewClient;
  * String-parameter. Finishes when WebView gets to a page, which has a
  * query parameter "oauth_verifier". Puts this verifier to an intent and sets
  * it as a result and finishes.
+ * 
+ * This is done in a WebView to keep consumer out of the authentication.
  * 
  * @author TODO
  */
@@ -38,9 +41,9 @@ public class LoginOAuthActivity extends Activity {
                 
                 if (url.contains("oauth_verifier=")) {
                     Log.v(TAG, "onPageFinished found URL: " + url);
+                    
+                    webView.setVisibility(View.GONE);
 
-                    //TODO: hide the ugly "?oauth_token=...&oauth_verifier"
-                    //      body in this phase
                     Uri uri = Uri.parse(url);
                     String verifier = uri.getQueryParameter("oauth_verifier");
 

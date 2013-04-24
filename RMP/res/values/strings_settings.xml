@@ -9,5 +9,7 @@
     <string name="oauth_uri_access_token">/oauth/access_token</string>
     <string name="oauth_uri_authorize">/dialog/authorize</string>
     <string name="oauth_uri_test_post">/api/test</string>
-
+    
+    <string name="uri_base">http://quiet-shore-5385.herokuapp.com</string>
+    <string name="uri_get_hall_of_fame">/hall_of_fame.json</string>
 </resources>

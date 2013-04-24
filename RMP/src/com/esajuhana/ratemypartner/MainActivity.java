@@ -1,8 +1,5 @@
 package com.esajuhana.ratemypartner;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -17,17 +14,19 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.esajuhana.ratemypartner.helpers.JSONParser;
 import com.esajuhana.ratemypartner.oauth.OAuth;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
     private final String TAG = "MainActivity";
     protected final Context context = this;
-    private OAuth OAUTH = null;
-    private String OAUTH_BASE_URI;
-    private String OAUTH_TEST_URI;
+    private OAuth mOAuth = null;
+    private String mOAuthUriBase;
+    private String mOAuthUriTest;
     public static boolean loggedIn = false;
     private int currentAdjustment = 0;
 
@@ -36,19 +35,19 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        OAUTH_BASE_URI = getResources().getString(R.string.oauth_uri_base);
-        OAUTH_TEST_URI = getResources().getString(R.string.oauth_uri_test_post);
+        mOAuthUriBase = getResources().getString(R.string.oauth_uri_base);
+        mOAuthUriTest = getResources().getString(R.string.oauth_uri_test_post);
 
         Intent intent = getIntent();
-        OAUTH = (OAuth) intent.getSerializableExtra("oauth_object");
+        mOAuth = (OAuth) intent.getSerializableExtra("oauth_object");
 
-        if (OAUTH == null) {
+        if (mOAuth == null) {
             updateDialog("Authentication error", "Something went wrong with OAuth.");
             finish();
         } else {
-            Log.v(TAG, "Got OAuth object with state: " + OAUTH.getState().toString());
+            Log.v(TAG, "Got OAuth object with state: " + mOAuth.getState().toString());
         }
-        
+
         // Get current points for the view
         new TestAccessTask2().execute();
     }
@@ -68,11 +67,6 @@ public class MainActivity extends Activity {
         animation.setRepeatMode(Animation.REVERSE); // symmetric animation
         final Button btn = (Button) findViewById(buttonResourceName);
         btn.startAnimation(animation);
-    }
-    
-    public void hallOfFame(View view) {
-	    Intent intent = new Intent(this, HallOfFameActivity.class);
-	    startActivity(intent);
     }
 
     /**
@@ -103,7 +97,9 @@ public class MainActivity extends Activity {
     }
 
     public void sendAdjustments(View view) {
-        new TestAccessTask().execute(currentAdjustment);
+        if (currentAdjustment != 0) {
+            new TestAccessTask().execute(currentAdjustment);
+        }
     }
 
     /*
@@ -130,15 +126,13 @@ public class MainActivity extends Activity {
                     Log.v(TAG, "Error in JSONObject.put: " + ex.getMessage());
                 }
 
-                result = OAUTH.accessProtectedResource(
-                        OAUTH_BASE_URI + OAUTH_TEST_URI, null,
+                result = mOAuth.accessProtectedResource(
+                        mOAuthUriBase + mOAuthUriTest, null,
                         jsonBody.toString(), OAuth.HttpRequestType.POST);
 
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
-                OAUTH.resetState();
-                // TODO: Show message
-                // TODO: callback with finish() (back to login)
+                mOAuth.resetState();
             }
 
             return result;
@@ -154,9 +148,9 @@ public class MainActivity extends Activity {
                 Log.e(TAG, "Error in JSONParser. Check error in that class.");
                 return;
             }
-            
+
             int points;
-            
+
             try {
                 boolean isOK = jsonResult.getBoolean("test");
                 int added = jsonResult.getInt("added");
@@ -174,7 +168,7 @@ public class MainActivity extends Activity {
             updateTextView(R.id.partner_score, points);
         }
     }
-    
+
     /*
      * AsyncTask for testing authenticated GET. Expects JSON result.
      */
@@ -182,19 +176,18 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(Void... params) {
-            String result = "";
+            String result;
 
             try {
 
-                result = OAUTH.accessProtectedResource(
-                        OAUTH_BASE_URI + "/api/test2", null,
+                result = mOAuth.accessProtectedResource(
+                        mOAuthUriBase + "/api/test2", null,
                         null, OAuth.HttpRequestType.GET);
 
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
-                OAUTH.resetState();
-                // TODO: Show message
-                // TODO: callback with finish() (back to login)
+                mOAuth.resetState();
+                return null;
             }
 
             return result;
@@ -202,38 +195,45 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
-            Log.v(TAG, "Got response: " + result);
+            if (result == null) {
+                showToast("Wrong state in OAuth authentication");
+                finish();
+            } else {
 
-            final JSONObject jsonResult = JSONParser.parse(result);
+                Log.v(TAG, "Got response: " + result);
 
-            if (jsonResult == null) {
-                Log.e(TAG, "Error in JSONParser. Check error with tag \"JSONParser\".");
-                return;
+                final JSONObject jsonResult = JSONParser.parse(result);
+
+                if (jsonResult == null) {
+                    Log.e(TAG, "Error in JSONParser. Check error with tag \"JSONParser\".");
+                    return;
+                }
+
+                int points;
+
+                try {
+                    points = jsonResult.getInt("points");
+                    Log.v(TAG, "JSON parsing result: " + points);
+                } catch (final JSONException ex) {
+                    Log.e(TAG, "Error in JSON parsing: " + ex.getMessage());
+
+                    updateDialog("Error", ex.getMessage());
+
+                    return;
+                }
+
+                //updateDialog("JSON-result", jsonResult.toString());
+                updateTextView(R.id.partner_score, points);
+                showToast("Logged in");
             }
-            
-            int points;
-            
-            try {
-                points = jsonResult.getInt("points");
-                Log.v(TAG, "JSON parsing result: " + points);
-            } catch (final JSONException ex) {
-                Log.e(TAG, "Error in JSON parsing: " + ex.getMessage());
-
-                updateDialog("Error", ex.getMessage());
-
-                return;
-            }
-
-            updateDialog("JSON-result", jsonResult.toString());
-            updateTextView(R.id.partner_score, points);
         }
     }
-    
+
     private void updateTextView(int id, int points) {
-            TextView scoreTextView = (TextView)findViewById(id);
-            scoreTextView.setText(String.valueOf(points));       
+        TextView scoreTextView = (TextView) findViewById(id);
+        scoreTextView.setText(String.valueOf(points));
     }
-    
+
     private void updateDialog(String title, String content) {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
@@ -242,5 +242,9 @@ public class MainActivity extends Activity {
         alertDialogBuilder.setMessage(content);
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+
+    protected void showToast(String content) {
+        Toast.makeText(this, content, Toast.LENGTH_LONG).show();
     }
 }

@@ -22,10 +22,16 @@ public class HallOfFameActivity extends Activity {
         "Botswana", "Bouvet Island", "Brazil"
         };
     
+    private String mUriBase;
+    private String mUriGetHallOfFame;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hall_of_fame);
+        
+        mUriBase = getResources().getString(R.string.uri_base);
+        mUriGetHallOfFame = getResources().getString(R.string.uri_get_hall_of_fame);
         
         fillTableLayout();
     }

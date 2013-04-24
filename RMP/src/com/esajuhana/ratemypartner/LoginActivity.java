@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.esajuhana.ratemypartner.oauth.OAuth;
 
 /**
@@ -27,11 +28,11 @@ public class LoginActivity extends Activity {
     
     private static final int VERIFIER_REQUEST_ID = 1;
     
-    private OAuth OAUTH;
-    private String OAUTH_BASE_URI;
-    private String OAUTH_REQUEST_TOKEN_URI;
-    private String OAUTH_ACCESS_TOKEN_URI;
-    private String OAUTH_AUTHORIZE_URI;
+    private OAuth mOAuth;
+    private String mOAuthUriBase;
+    private String mOAuthUriRequestToken;
+    private String mOAuthUriAccessToken;
+    private String mOauthUriAuthorize;
     
     private View mLoginFormView;
     private View mLoginStatusView;
@@ -44,11 +45,11 @@ public class LoginActivity extends Activity {
         String consumerKey = getResources().getString(R.string.oauth_consumer_key);
         String consumerSecret = getResources().getString(R.string.oauth_consumer_secret);
 
-        OAUTH = new OAuth(consumerKey, consumerSecret);
-        OAUTH_BASE_URI = getResources().getString(R.string.oauth_uri_base);
-        OAUTH_REQUEST_TOKEN_URI = getResources().getString(R.string.oauth_uri_request_token);
-        OAUTH_ACCESS_TOKEN_URI = getResources().getString(R.string.oauth_uri_access_token);
-        OAUTH_AUTHORIZE_URI = getResources().getString(R.string.oauth_uri_authorize);
+        mOAuth = new OAuth(consumerKey, consumerSecret);
+        mOAuthUriBase = getResources().getString(R.string.oauth_uri_base);
+        mOAuthUriRequestToken = getResources().getString(R.string.oauth_uri_request_token);
+        mOAuthUriAccessToken = getResources().getString(R.string.oauth_uri_access_token);
+        mOauthUriAuthorize = getResources().getString(R.string.oauth_uri_authorize);
 
         setContentView(R.layout.activity_login);
         setupActionBar();
@@ -62,12 +63,25 @@ public class LoginActivity extends Activity {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        showProgress(true);
-                        new OAuthRequestTokenTask().execute();
+                        if (mOAuth.getState() == OAuth.OAuthState.GotAccessToken) {
+                            OAuthCallbackAuthorized();
+                        } else {
+                            showProgress(true);
+                            new OAuthRequestTokenTask().execute();
+                        }
                     }
                 });
     }
 
+    /**
+     * Starts HallOfFameActivity
+     * @param view
+     */
+    public void hallOfFame(View view) {
+	    Intent intent = new Intent(this, HallOfFameActivity.class);
+	    startActivity(intent);
+    }
+    
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
      */
@@ -146,44 +160,18 @@ public class LoginActivity extends Activity {
         }
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onCancelled() {
-            showProgress(false);
-        }
-    }
-
     private class OAuthRequestTokenTask extends AsyncTask<Void, Void, String> {
 
         @Override
         protected String doInBackground(Void... params) {
-            String requestToken = "";
+            String requestToken;
 
             try {
-                requestToken = OAUTH.getRequestToken(OAUTH_BASE_URI + OAUTH_REQUEST_TOKEN_URI, null);
+                requestToken = mOAuth.getRequestToken(mOAuthUriBase + mOAuthUriRequestToken, null);
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
-                OAUTH.resetState();
+                mOAuth.resetState();
+                return null;
             }
 
             return requestToken;
@@ -191,28 +179,31 @@ public class LoginActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
+            if (result == null) {
+                showToast("Wrong state in OAuth authentication");
+            } else {
             OAuthCallbackLogin(result);
+            }
         }
 
         @Override
         protected void onCancelled() {
-            OAUTH.resetState();
+            mOAuth.resetState();
             showProgress(false);
         }
     }
 
     private void OAuthCallbackLogin(String result) {
         Log.v(TAG, "OAuthCallbackLogin called!");
-
         if (!TextUtils.isEmpty(result)) {
             String uriAuthorize = "";
 
             try {
-                uriAuthorize = OAUTH.getAuthorizeRequestUri(OAUTH_BASE_URI + OAUTH_AUTHORIZE_URI);
+                uriAuthorize = mOAuth.getAuthorizeRequestUri(mOAuthUriBase + mOauthUriAuthorize);
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
-                OAUTH.resetState();
-                // TODO: Show message
+                mOAuth.resetState();
+                showToast("Wrong state in OAuth authentication");
                 return;
             }
 
@@ -220,7 +211,9 @@ public class LoginActivity extends Activity {
 
             Intent intent = new Intent(this, LoginOAuthActivity.class);
             intent.putExtra("uri", uriAuthorize);
-
+            
+            showProgress(false);
+            
             startActivityForResult(intent, VERIFIER_REQUEST_ID);
         }
     }
@@ -233,14 +226,14 @@ public class LoginActivity extends Activity {
                 return "";
             }
 
-            String accessToken = "";
+            String accessToken;
 
             try {
-                accessToken = OAUTH.getAccessToken(OAUTH_BASE_URI + OAUTH_ACCESS_TOKEN_URI, params[0]);
+                accessToken = mOAuth.getAccessToken(mOAuthUriBase + mOAuthUriAccessToken, params[0]);
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
-                OAUTH.resetState();
-                // TODO: Show message
+                mOAuth.resetState();
+                return null;
             }
 
             return accessToken;
@@ -248,26 +241,31 @@ public class LoginActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
+            if (result == null)
+            {
+                showToast("Wrong state in OAuth authentication");
+            } else {
             Log.v(TAG, "Got access token: " + result);
             OAuthCallbackAuthorized();
+            }
         }
 
         @Override
         protected void onCancelled() {
-            OAUTH.resetState();
+            mOAuth.resetState();
             showProgress(false);
         }
     }
 
     protected void OAuthCallbackAuthorized() {
-        if (OAUTH.getState() == OAuth.OAuthState.GotAccessToken) {
+        if (mOAuth.getState() == OAuth.OAuthState.GotAccessToken) {
             showProgress(false);
             Intent oAuthIntent = new Intent(this, MainActivity.class);
-            oAuthIntent.putExtra("oauth_object", OAUTH);
+            oAuthIntent.putExtra("oauth_object", mOAuth);
             startActivity(oAuthIntent);
         } else {
-            // TODO: Show message that something went wrong
-            OAUTH.resetState();
+                showToast("Wrong state in OAuth authentication");
+            mOAuth.resetState();
         }
     }
 
@@ -278,8 +276,13 @@ public class LoginActivity extends Activity {
             if (resultCode == RESULT_OK) {
                 String verifier = data.getStringExtra("oauth_verifier");
                 Log.v(TAG, "Verifier got here: " + verifier);
+                showProgress(true);
                 new OAuthAccessTokenTask().execute(verifier);
             }
         }
+    }
+    
+    protected void showToast(String content) {
+        Toast.makeText(this, content, Toast.LENGTH_LONG).show();
     }
 }

@@ -6,7 +6,7 @@
     <string name="increase_value">+</string>
     <string name="decrease_value">-</string>
     <string name="send_adjustments">How has your partner behaved recently?</string>
-    <string name="partner_score">0</string>
+    <string name="partner_score"></string>
     <string name="partner_description">&quot;Turkish oil massage&quot;</string>
     <string name="partner_rank">Ranking: Sparkling bison</string>
     <string name="action_settings">Settings</string>

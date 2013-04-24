@@ -195,9 +195,9 @@ public class OAuth implements Serializable {
 
     /**
      * Accesses protected resource from the URL given as a parameter. GET/POST
-     * parameters can be specified with params-parameter.
-     * JSON POST-body can be provided as a parameter.
-     * Throws IllegalStateException if user has not authenticated.
+     * parameters can be specified with params-parameter. JSON POST-body can be
+     * provided as a parameter. Throws IllegalStateException if user has not
+     * authenticated.
      *
      * @param resourceUrl URL to access protected resource
      * @param params HTTP GET/POST parameters

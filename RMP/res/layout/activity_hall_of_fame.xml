@@ -13,27 +13,38 @@
             android:layout_height="fill_parent"
             android:orientation="vertical">
             <TableLayout android:id="@+id/TableLayout01"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_alignParentBottom="true"
-                 android:layout_alignParentLeft="true"
-                 android:layout_alignParentRight="true"
-                 android:layout_alignParentTop="true" >
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         android:layout_alignParentBottom="true"
+                         android:layout_alignParentLeft="true"
+                         android:layout_alignParentRight="true"
+                         android:layout_alignParentTop="true" >
         
                 <TableRow
                     android:id="@+id/tableRow1"
-                    android:layout_width="match_parent"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_horizontal" >
+                    android:gravity="center"
+                    android:padding="2dip">
                     <TextView
                         android:id="@+id/hall_of_fame"
-                        android:layout_width="match_parent"
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical|center_horizontal"
                         android:text="@string/hall_of_fame_title"
                         android:textSize="24sp" />
                 </TableRow>
-    
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:padding="5dip">
+                    <View
+                        android:layout_width="fill_parent"
+                        android:layout_height="2dip"
+                        android:background="#FFFFFF" />
+                </TableRow>   
             </TableLayout>
         </LinearLayout>
     </ScrollView>

@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
     }
 
     /*
-     * AsyncTask for testing authenticated POST. Request as JSON and
+     * AsyncTask for testing authenticated POST. Request body as JSON and
      * expects JSON return.
      */
     private class TestAccessTask extends AsyncTask<Integer, Void, String> {

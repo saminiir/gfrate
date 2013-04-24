@@ -12,8 +12,6 @@ import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 import com.esajuhana.ratemypartner.helpers.JSONParser;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -75,6 +73,7 @@ public class HallOfFameActivity extends Activity {
                 t.setText(rowObject.getString("name"));
                 row.addView(rank);
                 row.addView(t);
+                
                 table.addView(row, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
             } catch (JSONException ex) {
                 Log.e(TAG, ex.getMessage());

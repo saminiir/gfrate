@@ -78,16 +78,17 @@ public final class R {
         public static final int oauth_uri_access_token=0x7f050016;
         public static final int oauth_uri_authorize=0x7f050017;
         public static final int oauth_uri_base=0x7f050014;
+        public static final int oauth_uri_get_points=0x7f050019;
+        public static final int oauth_uri_post_points=0x7f050018;
         public static final int oauth_uri_request_token=0x7f050015;
-        public static final int oauth_uri_test_post=0x7f050018;
         public static final int or=0x7f050010;
         public static final int partner_description=0x7f050006;
         public static final int partner_rank=0x7f050007;
         public static final int partner_score=0x7f050005;
         public static final int send_adjustments=0x7f050004;
         public static final int title_activity_login=0x7f05000b;
-        public static final int uri_base=0x7f050019;
-        public static final int uri_get_hall_of_fame=0x7f05001a;
+        public static final int uri_base=0x7f05001a;
+        public static final int uri_get_hall_of_fame=0x7f05001b;
     }
     public static final class style {
         /** 

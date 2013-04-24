@@ -1,6 +1,7 @@
-var passport = require('passport')
+var passport = require('passport'),
+usersDB = require('./db/users')
 
-exports.info = [
+exports.postPoints = [
   passport.authenticate('token', { session: false }),
   function(req, res) {
     console.log(req.body);
@@ -13,7 +14,7 @@ exports.info = [
 
     req.user.points = req.user.points + req.body.to_add;
 
-    res.json({ test: true , added: req.body.to_add, points: req.user.points});
+    res.json({ isOK: true , added: req.body.to_add, points: req.user.points});
     return res;
   }
 ]
@@ -23,6 +24,15 @@ exports.getPoints = [
   function(req, res) {
 
     res.json({ points: req.user.points });
+
+    return res;
+  }
+]
+
+exports.getHallOfFame = [
+  function(req, res) {
+
+    res.json({ topPoints: usersDB.findAll()});
 
     return res;
   }

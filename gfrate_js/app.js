@@ -41,9 +41,9 @@ app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
 
-// add .json extension to the endpoints
-app.post('/api/test', test.info);
-app.get('/api/test2', test.getPoints);
+app.post('/points/add.json', test.postPoints);
+app.get('/points.json', test.getPoints);
+app.get('/hall_of_fame.json', test.getHallOfFame);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

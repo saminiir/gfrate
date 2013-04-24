@@ -42,12 +42,12 @@ public class LoginOAuthActivity extends Activity {
                 if (url.contains("oauth_verifier=")) {
                     Log.v(TAG, "onPageFinished found URL: " + url);
                     
-                    webView.setVisibility(View.GONE);
-
                     Uri uri = Uri.parse(url);
                     String verifier = uri.getQueryParameter("oauth_verifier");
 
                     if (verifier != null) {
+                        webView.setVisibility(View.GONE);
+                        
                         Log.v(TAG, "onPageFinished found verifier: " + verifier);
 
                         Intent resultData = new Intent();

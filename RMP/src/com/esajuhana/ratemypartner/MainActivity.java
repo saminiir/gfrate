@@ -26,7 +26,9 @@ public class MainActivity extends Activity {
     protected final Context context = this;
     private OAuth mOAuth = null;
     private String mOAuthUriBase;
-    private String mOAuthUriTest;
+    private String mOAuthUriPostNewPoints;
+    private String mOAuthUriGetPoints;
+    
     public static boolean loggedIn = false;
     private int currentAdjustment = 0;
 
@@ -36,7 +38,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         mOAuthUriBase = getResources().getString(R.string.oauth_uri_base);
-        mOAuthUriTest = getResources().getString(R.string.oauth_uri_test_post);
+        mOAuthUriPostNewPoints = getResources().getString(R.string.oauth_uri_post_points);
+        mOAuthUriGetPoints = getResources().getString(R.string.oauth_uri_get_points);
 
         Intent intent = getIntent();
         mOAuth = (OAuth) intent.getSerializableExtra("oauth_object");
@@ -127,7 +130,7 @@ public class MainActivity extends Activity {
                 }
 
                 result = mOAuth.accessProtectedResource(
-                        mOAuthUriBase + mOAuthUriTest, null,
+                        mOAuthUriBase + mOAuthUriPostNewPoints, null,
                         jsonBody.toString(), OAuth.HttpRequestType.POST);
 
             } catch (IllegalStateException ex) {
@@ -152,10 +155,10 @@ public class MainActivity extends Activity {
             int points;
 
             try {
-                boolean isOK = jsonResult.getBoolean("test");
+                boolean isOK = jsonResult.getBoolean("isOK");
                 int added = jsonResult.getInt("added");
                 points = jsonResult.getInt("points");
-                Log.v(TAG, "JSON parsing result: " + String.valueOf(isOK) + ", " + added);
+                Log.v(TAG, "JSON parsing result: " + String.valueOf(isOK) + ", " + added + ", " + points);
             } catch (final JSONException ex) {
                 Log.e(TAG, "Error in JSON parsing: " + ex.getMessage());
 
@@ -164,7 +167,8 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            updateDialog("JSON-result", jsonResult.toString());
+            //updateDialog("JSON-result", jsonResult.toString());
+            
             updateTextView(R.id.partner_score, points);
         }
     }
@@ -181,7 +185,7 @@ public class MainActivity extends Activity {
             try {
 
                 result = mOAuth.accessProtectedResource(
-                        mOAuthUriBase + "/api/test2", null,
+                        mOAuthUriBase + mOAuthUriGetPoints, null,
                         null, OAuth.HttpRequestType.GET);
 
             } catch (IllegalStateException ex) {

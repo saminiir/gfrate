@@ -32,6 +32,9 @@
         <activity
             android:name=".LoginOAuthActivity"
             android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name=".HallOfFameActivity"
+            android:theme="@android:style/Theme.NoTitleBar" />
     </application>
     
     <uses-permission android:name="android.permission.INTERNET" />

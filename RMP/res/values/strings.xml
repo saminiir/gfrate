@@ -10,5 +10,7 @@
     <string name="partner_description">&quot;Turkish oil massage&quot;</string>
     <string name="partner_rank">Ranking: Sparkling bison</string>
     <string name="action_settings">Settings</string>
+    <string name="hall_of_fame">Hall of Fame</string>
+    <string name="hall_of_fame_title">Hall of Fame</string>
 
 </resources>

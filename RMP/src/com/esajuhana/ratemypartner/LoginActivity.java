@@ -23,14 +23,16 @@ import com.esajuhana.ratemypartner.oauth.OAuth;
  */
 public class LoginActivity extends Activity {
 
-    // TODO: url constants from settings on create?
     private static final String TAG = "LoginActivity";
+    
     private static final int VERIFIER_REQUEST_ID = 1;
+    
     private OAuth OAUTH;
     private String OAUTH_BASE_URI;
     private String OAUTH_REQUEST_TOKEN_URI;
     private String OAUTH_ACCESS_TOKEN_URI;
     private String OAUTH_AUTHORIZE_URI;
+    
     private View mLoginFormView;
     private View mLoginStatusView;
     private TextView mLoginStatusMessageView;

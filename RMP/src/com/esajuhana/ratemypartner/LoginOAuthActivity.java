@@ -26,9 +26,10 @@ public class LoginOAuthActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_oauth);
 
+        // Get login URI from intent
         Intent intent = getIntent();
         String uri = intent.getStringExtra("uri");
-
+        
         final WebView webView = (WebView) findViewById(R.id.webview);
         webView.setWebViewClient(new WebViewClient() {
             
@@ -38,6 +39,8 @@ public class LoginOAuthActivity extends Activity {
                 if (url.contains("oauth_verifier=")) {
                     Log.v(TAG, "onPageFinished found URL: " + url);
 
+                    //TODO: hide the ugly "?oauth_token=...&oauth_verifier"
+                    //      body in this phase
                     Uri uri = Uri.parse(url);
                     String verifier = uri.getQueryParameter("oauth_verifier");
 

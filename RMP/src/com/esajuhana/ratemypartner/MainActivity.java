@@ -41,11 +41,13 @@ public class MainActivity extends Activity {
         OAUTH = (OAuth) intent.getSerializableExtra("oauth_object");
 
         if (OAUTH == null) {
+            updateDialog("Authentication error", "Something went wrong with OAuth.");
             finish();
         } else {
             Log.v(TAG, "Got OAuth object with state: " + OAUTH.getState().toString());
         }
         
+        // Get current points for the view
         new TestAccessTask2().execute();
     }
 
@@ -97,6 +99,10 @@ public class MainActivity extends Activity {
         new TestAccessTask().execute(currentAdjustment);
     }
 
+    /*
+     * AsyncTask for testing authenticated POST. Request as JSON and
+     * expects JSON return.
+     */
     private class TestAccessTask extends AsyncTask<Integer, Void, String> {
 
         @Override
@@ -162,6 +168,9 @@ public class MainActivity extends Activity {
         }
     }
     
+    /*
+     * AsyncTask for testing authenticated GET. Expects JSON result.
+     */
     private class TestAccessTask2 extends AsyncTask<Void, Void, String> {
 
         @Override
@@ -191,7 +200,7 @@ public class MainActivity extends Activity {
             final JSONObject jsonResult = JSONParser.parse(result);
 
             if (jsonResult == null) {
-                Log.e(TAG, "Error in JSONParser. Check error in that class.");
+                Log.e(TAG, "Error in JSONParser. Check error with tag \"JSONParser\".");
                 return;
             }
             

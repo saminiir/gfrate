@@ -46,7 +46,7 @@ public class OAuth implements Serializable {
     private static Random sRandom = new Random();
     
     /**
-     * States of this object
+     * Authentication states of this object
      */
     public static enum OAuthState {
 
@@ -95,6 +95,7 @@ public class OAuth implements Serializable {
         // Return token, secret and state to initial values
         resetState();
 
+        // Treemap for header parameters. Initially add getAlwaysUsedParams()
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
 
         if (TextUtils.isEmpty(callbackUrl)) {
@@ -103,12 +104,16 @@ public class OAuth implements Serializable {
             headerTreeMap.put("oauth_callback", callbackUrl);
         }
 
+        // Get signature. Signature is made with current headerTreeMap
         String signature = getSignature(requestTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
 
         String result = getHttpResult(requestTokenUrl, headerTreeMap, null, HttpRequestType.POST);
 
+        // Got result
         if (!TextUtils.isEmpty(result)) {
+            // Uri.parse with placeholder url to make splitting query-params
+            // easier. getQueryParameter returns null if param not found.
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
             String secret = uri.getQueryParameter("oauth_token_secret");
             String token = uri.getQueryParameter("oauth_token");
@@ -144,16 +149,19 @@ public class OAuth implements Serializable {
             throw new IllegalStateException("Access token has already been retrieved.");
         }
 
+        // Treemap for header parameters. Initially add getAlwaysUsedParams()
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
 
         headerTreeMap.put("oauth_token", mToken);
         headerTreeMap.put("oauth_verifier", verifier);
 
+        // Get and add signature. Signature is made with current headerTreeMap 
         String signature = getSignature(accessTokenUrl, headerTreeMap, HttpRequestType.POST);
         headerTreeMap.put("oauth_signature", signature);
 
         String result = getHttpResult(accessTokenUrl, headerTreeMap, null, HttpRequestType.POST);
-
+        
+        // Got result from getHttpResult
         if (!TextUtils.isEmpty(result)) {
             Uri uri = Uri.parse("http://placeholder.org/?" + result);
             String secret = uri.getQueryParameter("oauth_token_secret");
@@ -187,10 +195,12 @@ public class OAuth implements Serializable {
         } else if (mState == OAuthState.GotAccessToken) {
             throw new IllegalStateException("Access token has already been retrieved.");
         }
-
+        
+        // treemap with oauth_token param
         TreeMap<String, String> params = new TreeMap<String, String>();
         params.put("oauth_token", mToken);
 
+        // url as parameter concatenated with GET-query params from treemap
         return url + getGetQueryParameters(params);
     }
 
@@ -212,16 +222,21 @@ public class OAuth implements Serializable {
             throw new IllegalStateException("Access token hasn't been retrieved.");
         }
 
+        // Treemap of oauth and other parameters
         TreeMap<String, String> paramsTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
         paramsTreeMap.put("oauth_token", mToken);
 
+        // If caller provides additional parameters
         if (params != null) {
             paramsTreeMap.putAll(params);
         }
 
+        // Get signature and add it to treemap. HTTP-request type is provided
+        // as a HttpRequestType-enum parameter by caller
         String signature = getSignature(resourceUrl, paramsTreeMap, requestType);
         paramsTreeMap.put("oauth_signature", signature);
 
+        //getHttpResult with url, params, possible body and HttpRequestType-enum
         String result = getHttpResult(resourceUrl, paramsTreeMap, body, requestType);
 
         return result;
@@ -239,12 +254,15 @@ public class OAuth implements Serializable {
     }
 
     private Map<String, String> getAlwaysUsedParams() {
-
+        
+        // Get always used oauth-parameters as Map<String, String>
+        // Timestamp and nonce to strings
         String timestamp = String.valueOf(getTimestamp());
         String nonce = String.valueOf(getNonce());
 
         Map<String, String> params = new TreeMap<String, String>();
 
+        // put oauth-parameters
         params.put("oauth_consumer_key", mConsumerKey);
         params.put("oauth_nonce", nonce);
         params.put("oauth_signature_method", mOauthSignatureMethod);
@@ -266,35 +284,45 @@ public class OAuth implements Serializable {
         String result = "";
 
         try {
+            // HttpClient with timeout-param from private constant
             HttpClient httpClient = new DefaultHttpClient();
             HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), TIMEOUT);
 
+            // Caller provided HttpRequestType.POST enum as requestType-param
             if (requestType == HttpRequestType.POST) {
                 HttpPost httpPost = new HttpPost(url);
+                // getPostHeader from params-treemap given as a parameter
                 String headerContent = getPostHeader(params);
 
                 Log.v(TAG, "Authorization header: " + headerContent);
-
+                
+                // Authorization-header from headerContent
                 httpPost.setHeader("Authorization", headerContent);
 
-                // TODO: refactor... little bit too much going on here
+                // TODO: Refactor. little bit too much going on in this method
                 if (jsonBody != null) {
+                    // Set JSON content type and accept headers
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
 
+                    // jsonBody to StringEntity and as request body
                     StringEntity se = new StringEntity(jsonBody);
                     se.setContentType("text/xml");
                     se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json; charset=utf-8"));
                     httpPost.setEntity(se);
                 }
 
+                // Execute and get entity as result
                 HttpResponse response = httpClient.execute(httpPost);
                 result = EntityUtils.toString(response.getEntity());
             } else {
+                // If enum is not POST it is considered as GET request
+                // transform params-treemap to GET-query parameter string
                 String queryParams = getGetQueryParameters(params);
 
                 Log.v(TAG, "Query params: " + queryParams);
 
+                // GET-request and result string from result body
                 HttpGet httpGet = new HttpGet(url + queryParams);
                 HttpResponse response = httpClient.execute(httpGet);
                 result = EntityUtils.toString(response.getEntity());
@@ -313,35 +341,43 @@ public class OAuth implements Serializable {
             Log.v(TAG, "HTTP-result body was empty");
         }
 
+        // returns result body as a string
         return result;
     }
 
     private String getSignature(String url, TreeMap<String, String> headerTreeMap, HttpRequestType requestType) {
 
+        // Transforms headerTreeMap given as a parameter to OAuth 1.0a signature
         boolean firstKey = true;
         StringBuilder normalizedParameters = new StringBuilder();
 
         for (String key : headerTreeMap.keySet()) {
             if (!firstKey) {
+                // & between parameters
                 normalizedParameters.append("&");
             } else {
                 firstKey = false;
             }
 
+            // append(key=value)
             normalizedParameters.append(key);
             normalizedParameters.append("=");
             normalizedParameters.append(headerTreeMap.get(key));
         }
 
+        // requestType-enum name is GET or POST -> toString()
         StringBuilder ba = new StringBuilder(requestType.toString());
         ba.append("&");
         ba.append(getUrlEncoded(url));
         ba.append("&");
         ba.append(getUrlEncoded(normalizedParameters.toString()));
 
+        // basestring from ba-stringbuilder
         String basestring = ba.toString();
         Log.v(TAG, "Basestring: " + basestring);
+        // hashkey from mConsumerSecret and mTokenSecret attributes 
         String hashkey = mConsumerSecret + "&" + mTokenSecret;
+        // signature with getHmacShaSignature-method
         String signature = getHmacShaSignature(basestring, hashkey);
 
         return signature;
@@ -349,6 +385,7 @@ public class OAuth implements Serializable {
 
     private String getPostHeader(TreeMap<String, String> headerTreeMap) {
 
+        // Transforms TreeMap<String, String> to OAuth POST-header
         boolean firstKey = true;
         StringBuilder header = new StringBuilder();
 
@@ -356,11 +393,14 @@ public class OAuth implements Serializable {
 
         for (String key : headerTreeMap.keySet()) {
             if (!firstKey) {
+                // , -between parameters
                 header.append(", ");
             } else {
+                // not with first
                 firstKey = false;
             }
 
+            // append key="value" to header-stringbuilder
             header.append(key);
             header.append("=\"");
             header.append(headerTreeMap.get(key));
@@ -372,20 +412,23 @@ public class OAuth implements Serializable {
 
     private String getGetQueryParameters(TreeMap<String, String> paramsTreeMap) {
 
+        // Transforms treemap to GET-query params string: ?key=value&key=val...
         boolean firstKey = true;
         StringBuilder queryStringBuilder = new StringBuilder();
 
         for (String key : paramsTreeMap.keySet()) {
             if (!firstKey) {
+                // & between params
                 queryStringBuilder.append("&");
             } else {
+                // ? before first param
                 queryStringBuilder.append("?");
                 firstKey = false;
             }
 
+            // append key=value
             queryStringBuilder.append(key);
             queryStringBuilder.append("=");
-
             queryStringBuilder.append(getUrlEncoded(paramsTreeMap.get(key)));
         }
 
@@ -393,13 +436,17 @@ public class OAuth implements Serializable {
     }
 
     private static String getHmacShaSignature(String basesign, String hashKey) {
+        // Gets HMAC-SHA1 cryptographic signature from basestring and key.
+        
         String HMAC_SHA1_ALGORITHM = "HmacSHA1";
         String result = null;
 
         try {
+            // Key and MAC from hash key using HMAC-SHA1
             Key signingKey = new SecretKeySpec(hashKey.getBytes(), HMAC_SHA1_ALGORITHM);
             Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
             mac.init(signingKey);
+            // Compute digest on basestring
             byte[] rawHmac = mac.doFinal(basesign.getBytes());
             result = Base64.encodeToString(rawHmac, Base64.NO_WRAP);
         } catch (Exception e) {
@@ -410,6 +457,7 @@ public class OAuth implements Serializable {
     }
 
     private static String getUrlEncoded(String toEncode) {
+        // Helper for URL-encoding a string given as a parameter
         try {
             toEncode = URLEncoder.encode(toEncode, "UTF-8");
         } catch (UnsupportedEncodingException ex) {

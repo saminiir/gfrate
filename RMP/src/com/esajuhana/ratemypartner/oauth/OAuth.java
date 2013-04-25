@@ -53,6 +53,9 @@ public class OAuth implements Serializable {
         Init, GotRequestToken, GotAccessToken
     }
 
+    /**
+     * HTTP-request types
+     */
     public static enum HttpRequestType {
 
         POST, GET
@@ -131,7 +134,6 @@ public class OAuth implements Serializable {
      *
      * @param accessTokenUrl
      * @param verifier
-     * @param token
      * @return http body
      */
     public String getAccessToken(String accessTokenUrl, String verifier) {
@@ -175,6 +177,7 @@ public class OAuth implements Serializable {
      * Gets the authorize get-request URI in OAuth 1.0 form. This URI can be
      * used in outer web browser to authenticate with the service provider.
      *
+     * @param url 
      * @return URI as a string with query parameters
      */
     public String getAuthorizeRequestUri(String url) {

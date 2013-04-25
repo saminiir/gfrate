@@ -20,7 +20,7 @@ import com.esajuhana.ratemypartner.oauth.OAuth;
 
 /**
  * Activity which displays a login screen to the user. TODO: messages,
- * exceptions, errors, login animation etc.
+ * exceptions, errors etc.
  */
 public class LoginActivity extends Activity {
 
@@ -196,6 +196,9 @@ public class LoginActivity extends Activity {
 
     private void OAuthCallbackLogin(String result) {
         Log.v(TAG, "OAuthCallbackLogin called!");
+        
+        showProgress(false);
+        
         if (!TextUtils.isEmpty(result)) {
             String uriAuthorize = "";
 
@@ -204,6 +207,7 @@ public class LoginActivity extends Activity {
             } catch (IllegalStateException ex) {
                 Log.v(TAG, "Wrong state: " + ex.getMessage());
                 mOAuth.resetState();
+                
                 showToast("Wrong state in OAuth authentication");
                 return;
             }
@@ -212,9 +216,7 @@ public class LoginActivity extends Activity {
 
             Intent intent = new Intent(this, LoginOAuthActivity.class);
             intent.putExtra("uri", uriAuthorize);
-            
-            showProgress(false);
-            
+                        
             startActivityForResult(intent, VERIFIER_REQUEST_ID);
         }
     }
@@ -260,15 +262,15 @@ public class LoginActivity extends Activity {
     }
 
     protected void OAuthCallbackAuthorized() {
+        showProgress(false);
+                    
         if (mOAuth.getState() == OAuth.OAuthState.GotAccessToken) {
-            showProgress(false);
             Intent oAuthIntent = new Intent(this, MainActivity.class);
             oAuthIntent.putExtra("oauth_object", mOAuth);
             startActivity(oAuthIntent);
         } else {
             showToast("Wrong state in OAuth authentication");
             mOAuth.resetState();
-            showProgress(false);
         }
     }
 

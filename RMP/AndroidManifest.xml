@@ -20,7 +20,6 @@
         </activity>
         <activity android:name=".LoginActivity"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustResize|stateVisible"
             android:parentActivityName="com.esajuhana.ratemypartner.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -44,7 +44,7 @@ public class OAuth implements Serializable {
     private String mTokenSecret = "";
     private OAuthState mState = OAuthState.Init;
     private static Random sRandom = new Random();
-
+    
     /**
      * States of this object
      */

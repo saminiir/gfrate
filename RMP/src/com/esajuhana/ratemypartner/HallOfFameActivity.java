@@ -1,17 +1,7 @@
 package com.esajuhana.ratemypartner;
 
-import android.app.Activity;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.Menu;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TableRow.LayoutParams;
-import android.widget.TextView;
-import com.esajuhana.ratemypartner.helpers.JSONParser;
 import java.io.IOException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -22,6 +12,20 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.Activity;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.Menu;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TableRow.LayoutParams;
+import android.widget.TextView;
+
+import com.esajuhana.ratemypartner.helpers.JSONParser;
+import com.esajuhana.ratemypartner.helpers.RateMyPartnerUtils;
 
 public class HallOfFameActivity extends Activity {
 
@@ -71,12 +75,14 @@ public class HallOfFameActivity extends Activity {
                 JSONObject rowObject = array.getJSONObject(i);
                 // create a new TableRow
                 TableRow row = new TableRow(this);
-                // create a new TextView
                 TextView rank = new TextView(this);
-                rank.setText(rowObject.getInt("points") + ": ");
+                rank.setText(i+1 + ".");
+                TextView score = new TextView(this);
+                score.setText(RateMyPartnerUtils.addLeadingPlusSign(rowObject.getInt("points")) + " ");
                 TextView t = new TextView(this);
                 t.setText(rowObject.getString("name"));
                 row.addView(rank);
+                row.addView(score);
                 row.addView(t);
                 
                 table.addView(row, new TableLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));

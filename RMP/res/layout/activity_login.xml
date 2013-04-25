@@ -1,5 +1,6 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
        xmlns:tools="http://schemas.android.com/tools"
+       android:background="@color/base_pink"
        tools:context=".LoginActivity" >
 
     <!-- Login progress -->
@@ -34,30 +35,36 @@
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:background="@color/base_pink" >
 
         <LinearLayout
             style="@style/LoginFormContainer"
             android:layout_gravity="center_vertical"
             android:orientation="vertical" >
+
             <Button
                 android:id="@+id/button1"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
+                android:background="@color/light_pink"
                 android:drawableTop="@drawable/hall_of_fame"
                 android:onClick="hallOfFame"
                 android:text="@string/hall_of_fame" />
+
             <Button
                 android:id="@+id/login_oauth_button"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginTop="16dp"
+                android:background="@color/light_pink"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:text="@string/action_login_oauth" />
+
         </LinearLayout>
     </ScrollView>
 </merge>

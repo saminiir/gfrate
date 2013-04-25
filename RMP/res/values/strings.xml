@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RMP</string>
+    <string name="app_name">RateMyPartner</string>
     <string name="hello_world">Hello world!</string>
     <string name="increase_value">+</string>
     <string name="decrease_value">-</string>
     <string name="send_adjustments">How has your partner behaved recently?</string>
     <string name="partner_score"></string>
     <string name="partner_description">&quot;Turkish oil massage&quot;</string>
-    <string name="partner_rank">Ranking: Sparkling bison</string>
+    <string name="partner_rank">American Beauty</string>
     <string name="action_settings">Settings</string>
     <string name="hall_of_fame">Hall of Fame</string>
     <string name="hall_of_fame_title">Hall of Fame</string>
+    
+    <!-- Colors -->
+    <color name="base_pink">#e03468</color>
+    <color name="light_pink">#f6aac2</color>
+    <color name="dark_pink">#5b001b</color>
+    <color name="black">#000000</color>
 
 </resources>

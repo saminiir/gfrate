@@ -1,9 +1,13 @@
 package com.esajuhana.ratemypartner;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,10 +19,10 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.esajuhana.ratemypartner.helpers.JSONParser;
+import com.esajuhana.ratemypartner.helpers.RateMyPartnerUtils;
 import com.esajuhana.ratemypartner.oauth.OAuth;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class MainActivity extends Activity {
 
@@ -235,7 +239,12 @@ public class MainActivity extends Activity {
 
     private void updateTextView(int id, int points) {
         TextView scoreTextView = (TextView) findViewById(id);
-        scoreTextView.setText(String.valueOf(points));
+        scoreTextView.setText(RateMyPartnerUtils.addLeadingPlusSign(points));
+        Typeface font = Typeface.createFromAsset(getAssets(), "Rambla-Bold.ttf");  
+        scoreTextView.setTypeface(font);  
+        currentAdjustment = 0;
+        Button sendAdjustment = (Button) findViewById(R.id.send_adjustments);
+        sendAdjustment.setText("Tap here to compensate rating by (" + currentAdjustment + ")");
     }
 
     private void updateDialog(String title, String content) {

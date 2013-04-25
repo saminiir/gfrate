@@ -43,15 +43,20 @@ public class HallOfFameActivity extends Activity {
 
     public void fillTableLayout() {
 
+        if (mJSONtopList == null) {
+            return;
+        }
+        
         // get a reference for the TableLayout
         TableLayout table = (TableLayout) findViewById(R.id.TableLayout01);
         
-        JSONArray array = null;
+        JSONArray array;
         
         try {
             array = mJSONtopList.getJSONArray("topPoints");
         } catch (JSONException ex) {
             Log.e(TAG, ex.getMessage());
+            return;
         }
         
         Log.v(TAG, array.toString());
@@ -103,6 +108,7 @@ public class HallOfFameActivity extends Activity {
             HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 10000);
 
             HttpGet httpGet = new HttpGet(mUriBase + mUriGetHallOfFame);
+            
             try {
                 HttpResponse response = httpClient.execute(httpGet);
                 result = EntityUtils.toString(response.getEntity());

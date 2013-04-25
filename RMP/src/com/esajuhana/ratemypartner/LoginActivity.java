@@ -181,6 +181,7 @@ public class LoginActivity extends Activity {
         protected void onPostExecute(String result) {
             if (result == null) {
                 showToast("Wrong state in OAuth authentication");
+                showProgress(false);
             } else {
             OAuthCallbackLogin(result);
             }
@@ -244,6 +245,7 @@ public class LoginActivity extends Activity {
             if (result == null)
             {
                 showToast("Wrong state in OAuth authentication");
+                showProgress(false);
             } else {
             Log.v(TAG, "Got access token: " + result);
             OAuthCallbackAuthorized();
@@ -264,8 +266,9 @@ public class LoginActivity extends Activity {
             oAuthIntent.putExtra("oauth_object", mOAuth);
             startActivity(oAuthIntent);
         } else {
-                showToast("Wrong state in OAuth authentication");
+            showToast("Wrong state in OAuth authentication");
             mOAuth.resetState();
+            showProgress(false);
         }
     }
 

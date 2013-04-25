@@ -8,9 +8,9 @@
     <string name="oauth_uri_request_token">/oauth/request_token</string>
     <string name="oauth_uri_access_token">/oauth/access_token</string>
     <string name="oauth_uri_authorize">/dialog/authorize</string>
-    <string name="oauth_uri_post_points">/points/add.json</string>
-    <string name="oauth_uri_get_points">/points.json</string>
+    <string name="oauth_uri_post_points">/api/points/add.json</string>
+    <string name="oauth_uri_get_points">/api/points.json</string>
     
     <string name="uri_base">http://quiet-shore-5385.herokuapp.com</string>
-    <string name="uri_get_hall_of_fame">/hall_of_fame.json</string>
+    <string name="uri_get_hall_of_fame">/api/hall_of_fame.json</string>
 </resources>

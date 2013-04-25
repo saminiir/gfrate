@@ -3,7 +3,7 @@ var express = require('express')
   , routes = require('./routes')
   , oauth = require('./oauth')
   , path = require('path')
-  , test = require('./test');
+  , api = require('./api');
 
 var app = express();
 app.configure(function(){
@@ -41,9 +41,9 @@ app.get('/oauth/request_token', oauth.requestToken);
 app.post('/oauth/access_token', oauth.accessToken);
 app.get('/oauth/access_token', oauth.accessToken);
 
-app.post('/points/add.json', test.postPoints);
-app.get('/points.json', test.getPoints);
-app.get('/hall_of_fame.json', test.getHallOfFame);
+app.post('/api/points/add.json', api.postPoints);
+app.get('/api/points.json', api.getPoints);
+app.get('/api/hall_of_fame.json', api.getHallOfFame);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {

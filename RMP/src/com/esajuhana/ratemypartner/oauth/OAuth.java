@@ -90,9 +90,7 @@ public class OAuth implements Serializable {
     public String getRequestToken(String requestTokenUrl, String callbackUrl) {
 
         // Return token, secret and state to initial values
-        mToken = "";
-        mTokenSecret = "";
-        mState = OAuthState.Init;
+        resetState();
 
         TreeMap<String, String> headerTreeMap = new TreeMap<String, String>(getAlwaysUsedParams());
 
@@ -261,7 +259,7 @@ public class OAuth implements Serializable {
         return System.currentTimeMillis() / 1000;
     }
 
-    private String getHttpResult(String url, TreeMap<String, String> params, String body, HttpRequestType requestType) throws ParseException {
+    private String getHttpResult(String url, TreeMap<String, String> params, String jsonBody, HttpRequestType requestType) throws ParseException {
         String result = "";
 
         try {
@@ -277,11 +275,11 @@ public class OAuth implements Serializable {
                 httpPost.setHeader("Authorization", headerContent);
 
                 // TODO: refactor... little bit too much going on here
-                if (body != null) {
+                if (jsonBody != null) {
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
 
-                    StringEntity se = new StringEntity(body);
+                    StringEntity se = new StringEntity(jsonBody);
                     se.setContentType("text/xml");
                     se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json; charset=utf-8"));
                     httpPost.setEntity(se);

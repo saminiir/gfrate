@@ -256,13 +256,14 @@ public class OAuth implements Serializable {
     private Map<String, String> getAlwaysUsedParams() {
         
         // Get always used oauth-parameters as Map<String, String>
+        
         // Timestamp and nonce to strings
         String timestamp = String.valueOf(getTimestamp());
         String nonce = String.valueOf(getNonce());
 
         Map<String, String> params = new TreeMap<String, String>();
 
-        // put oauth-parameters
+        // Put oauth-parameters
         params.put("oauth_consumer_key", mConsumerKey);
         params.put("oauth_nonce", nonce);
         params.put("oauth_signature_method", mOauthSignatureMethod);
@@ -301,11 +302,11 @@ public class OAuth implements Serializable {
 
                 // TODO: Refactor. little bit too much going on in this method
                 if (jsonBody != null) {
-                    // Set JSON content type and accept headers
+                    // Request and response is, for now, JSON
                     httpPost.setHeader("Accept", "application/json");
                     httpPost.setHeader("Content-Type", "application/json; charset=utf-8");
 
-                    // jsonBody to StringEntity and as request body
+                    // jsonBody to StringEntity and as a request body
                     StringEntity se = new StringEntity(jsonBody);
                     se.setContentType("text/xml");
                     se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json; charset=utf-8"));
@@ -316,8 +317,9 @@ public class OAuth implements Serializable {
                 HttpResponse response = httpClient.execute(httpPost);
                 result = EntityUtils.toString(response.getEntity());
             } else {
-                // If enum is not POST it is considered as GET request
-                // transform params-treemap to GET-query parameter string
+                // If HttpRequestType-enum is not POST it is considered to
+                // be a GET-request.
+                // Transform params-treemap to GET-query parameter string
                 String queryParams = getGetQueryParameters(params);
 
                 Log.v(TAG, "Query params: " + queryParams);
